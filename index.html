@@ -1,0 +1,1154 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ngebut JLPT</title>
+    <style>
+      :root{
+        --bg0:#fff7fb;
+        --bg1:#f3f7ff;
+        --ink:#181a2a;
+        --muted:rgba(24,26,42,.72);
+        --muted2:rgba(24,26,42,.58);
+        --a:#5aa7ff;
+        --b:#2fd2b0;
+        --c:#ffbf5a;
+        --bad:#ff4f8f;
+        --good:#2fd2b0;
+        --gap:14px;
+        --shadow:0 18px 45px rgba(17,20,34,.14);
+      }
+
+      *{box-sizing:border-box}
+      html,body{height:100%}
+      body{
+        margin:0;
+        color:var(--ink);
+        background:
+          radial-gradient(1200px 600px at 20% 0%, rgba(90,167,255,.20), transparent 60%),
+          radial-gradient(1000px 700px at 90% 20%, rgba(47,210,176,.18), transparent 55%),
+          radial-gradient(900px 700px at 60% 110%, rgba(255,191,90,.18), transparent 55%),
+          linear-gradient(180deg, var(--bg0), var(--bg1));
+        font-family: ui-sans-serif, -apple-system, system-ui, "Avenir Next", "Avenir", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Segoe UI", sans-serif;
+        letter-spacing:.1px;
+        -webkit-text-size-adjust:100%;
+        text-size-adjust:100%;
+      }
+
+      body::before{
+        content:"";
+        position:fixed;
+        inset:-220px;
+        background:conic-gradient(from 210deg at 50% 50%, rgba(90,167,255,.20), rgba(47,210,176,.18), rgba(255,191,90,.16), rgba(255,79,143,.14), rgba(90,167,255,.20));
+        filter:blur(70px);
+        opacity:.55;
+        animation:drift 12s ease-in-out infinite alternate;
+        pointer-events:none;
+        z-index:-1;
+      }
+
+      @keyframes drift{from{transform:translate3d(-2%, -1%, 0) rotate(-6deg)}to{transform:translate3d(2%, 1%, 0) rotate(6deg)}}
+
+      .shell{min-height:100%;display:grid;place-items:center;padding:clamp(12px, 3vw, 22px);padding-bottom:calc(clamp(12px, 3vw, 22px) + env(safe-area-inset-bottom));}
+
+      .frame{
+        width:min(980px, 100%);
+        background:linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.76));
+        border:1px solid rgba(24,26,42,.10);
+        border-radius:26px;
+        box-shadow:var(--shadow);
+        padding:clamp(12px, 2.4vw, 18px);
+        backdrop-filter: blur(10px);
+      }
+
+      .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 8px 16px 8px;}
+      .brand{display:flex;align-items:center;gap:12px;}
+      .brand__mark{
+        width:44px;height:44px;display:grid;place-items:center;border-radius:14px;
+        border:1px solid rgba(24,26,42,.14);
+        background:linear-gradient(180deg, rgba(90,167,255,.18), rgba(255,255,255,.70));
+        color:rgba(24,26,42,.92);
+        font-weight:950;
+        letter-spacing:.6px;
+      }
+      .brand__title{font-weight:900;font-size:18px;}
+      .brand__subtitle{color:var(--muted2);font-size:12px;margin-top:2px;line-height:1.25;}
+
+      .badge{
+        font-weight:900;border:1px solid rgba(24,26,42,.14);border-radius:999px;padding:10px 14px;
+        background:linear-gradient(180deg, rgba(255,191,90,.30), rgba(255,255,255,.72));
+        color:rgba(24,26,42,.92);
+      }
+
+      .stage{
+        border-radius:22px;border:1px solid rgba(24,26,42,.10);
+        background:linear-gradient(180deg, rgba(255,255,255,.60), rgba(255,255,255,.42));
+        padding:clamp(14px, 2.4vw, 18px);
+        min-height:min(560px, calc(100vh - 190px));
+        position:relative;
+        overflow:auto;
+      }
+
+      .foot{padding:14px 8px 6px 8px;text-align:center;color:var(--muted2);font-size:12px;}
+
+      .panel{max-width:780px;margin:0 auto;display:grid;gap:var(--gap);}
+      .hero{text-align:center;padding:18px 10px;display:grid;gap:12px;}
+      .hero__h{font-size:clamp(26px, 4.6vw, 34px);font-weight:950;letter-spacing:.2px;}
+      .hero__p{color:var(--muted);font-size:clamp(14px, 2.6vw, 16px);line-height:1.5;}
+
+      .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+
+      .pill{display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(24,26,42,.12);background:rgba(255,255,255,.60);padding:10px 12px;border-radius:999px;font-weight:900;color:rgba(24,26,42,.92);}
+      .pill__muted{color:var(--muted);font-weight:900;}
+
+      .pill--type{border-color:rgba(24,26,42,.12);background:linear-gradient(180deg, rgba(90,167,255,.14), rgba(255,255,255,.62));}
+
+      .card{border:1px solid rgba(24,26,42,.12);border-radius:22px;padding:16px;background:linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.56));}
+
+      .grid{display:grid;grid-template-columns: 1fr;gap:12px;}
+
+      .level{border:1px solid rgba(24,26,42,.12);border-radius:22px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.56));display:grid;gap:10px;}
+      .level__top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+      .level__name{font-weight:950;font-size:18px;}
+      .level__desc{color:var(--muted2);font-weight:800;font-size:12px;line-height:1.35;margin-top:4px;}
+      .level__meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+      .level__lock{color:rgba(24,26,42,.88);font-weight:950;}
+
+      .tag{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid rgba(24,26,42,.12);background:rgba(255,255,255,.66);font-weight:900;color:rgba(24,26,42,.92);font-size:12px;}
+
+      .prompt{display:grid;place-items:center;padding:18px 14px;background:linear-gradient(180deg, rgba(90,167,255,.16), rgba(255,255,255,.62));border-radius:20px;border:1px dashed rgba(24,26,42,.18);}
+      .prompt__primary{font-size:clamp(30px, 7vw, 42px);font-weight:950;letter-spacing:.4px;line-height:1.15;text-align:center;}
+      .prompt__secondary{color:var(--muted);font-weight:900;font-size:14px;margin-top:10px;text-align:center;}
+
+      .q{font-size:18px;font-weight:900;line-height:1.4;}
+      .q__sub{margin-top:8px;color:var(--muted2);font-size:13px;font-weight:800;line-height:1.35;}
+
+      .answers{display:grid;grid-template-columns:1fr;gap:12px;}
+
+      .btn{appearance:none;border:1px solid rgba(24,26,42,.14);background:linear-gradient(180deg, rgba(255,255,255,.70), rgba(255,255,255,.56));border-radius:20px;padding:14px 14px;text-align:left;cursor:pointer;transition: transform .08s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;color:rgba(24,26,42,.92);font-family:inherit;}
+      .btn:hover{transform:translateY(-2px);border-color:rgba(24,26,42,.26);box-shadow:0 18px 40px rgba(17,20,34,.18);}
+      .btn:active{transform:translateY(1px);}
+      .btn:focus-visible{outline:4px solid rgba(90,167,255,.35);outline-offset:2px;}
+      .btn[disabled]{cursor:not-allowed;opacity:.75;transform:none;box-shadow:none;}
+
+      .btn__top{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+      .btn__label{font-weight:950;font-size:clamp(16px, 2.6vw, 18px);}
+      .btn__tag{font-weight:950;width:34px;height:34px;display:grid;place-items:center;border-radius:12px;border:1px solid rgba(24,26,42,.14);background:rgba(255,255,255,.66);color:rgba(24,26,42,.92);}
+
+      .btn--a{border-color:rgba(90,167,255,.42);} .btn--b{border-color:rgba(47,210,176,.42);} .btn--c{border-color:rgba(255,191,90,.42);} 
+      .btn--right{border-color:rgba(47,210,176,.72);background:linear-gradient(180deg, rgba(47,210,176,.16), rgba(255,255,255,.56));}
+      .btn--wrong{border-color:rgba(255,79,143,.72);background:linear-gradient(180deg, rgba(255,79,143,.12), rgba(255,255,255,.56));animation:shake .18s ease 2;}
+
+      @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}100%{transform:translateX(0)}}
+
+      .feedback{border-radius:20px;border:1px solid rgba(24,26,42,.12);background:rgba(255,255,255,.70);padding:14px;display:grid;gap:10px;}
+      .feedback__h{font-size:18px;font-weight:950;}
+      .feedback__p{color:var(--muted);font-weight:850;line-height:1.4;}
+
+      .cta{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:6px;}
+      .cta .btn{min-width:min(240px, 100%);width:min(340px, 100%);text-align:center;}
+
+      .small{background:rgba(255,255,255,.66);border:1px solid rgba(24,26,42,.12);border-radius:16px;padding:10px 12px;font-weight:900;cursor:pointer;color:rgba(24,26,42,.92);font-family:inherit;transition: transform .08s ease, border-color .18s ease;}
+      .small:hover{transform:translateY(-1px);border-color:rgba(24,26,42,.24);} .small:active{transform:translateY(1px);}
+
+      .progress{height:10px;border-radius:999px;border:1px solid rgba(24,26,42,.12);background:rgba(255,255,255,.56);overflow:hidden;}
+      .progress__bar{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg, rgba(90,167,255,.95), rgba(47,210,176,.95), rgba(255,191,90,.92));box-shadow:0 14px 30px rgba(17,20,34,.12);transition: width .22s ease;}
+
+      .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:18px;background:rgba(250,245,255,.62);border-radius:22px;}
+      .overlay__card{width:min(720px, 100%);border:1px solid rgba(24,26,42,.14);border-radius:24px;padding:16px;background:linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.70));box-shadow:0 30px 70px rgba(17,20,34,.16);}
+
+      .nb-card{border:2px solid rgba(24,26,42,.82);background:rgba(255,255,255,.70);box-shadow:10px 10px 0 rgba(24,26,42,.18);border-radius:18px;padding:16px;}
+      .resultGrid{display:grid;grid-template-columns:1fr;gap:12px;}
+      .resultHero{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+      .scoreBig{font-weight:950;font-size:44px;letter-spacing:.2px;}
+      .scoreSub{color:var(--muted);font-weight:850;}
+      .ring{width:132px;height:132px;border-radius:999px;display:grid;place-items:center;border:2px solid rgba(24,26,42,.82);box-shadow:10px 10px 0 rgba(24,26,42,.18);background:rgba(255,255,255,.70);}
+      .ring__inner{width:96px;height:96px;border-radius:999px;border:2px solid rgba(24,26,42,.82);background:rgba(255,255,255,.66);display:grid;place-items:center;}
+      .ring__pct{font-weight:950;font-size:22px;}
+      .stats{display:grid;grid-template-columns:1fr;gap:12px;}
+      .statKey{color:var(--muted2);font-weight:900;font-size:12px;letter-spacing:.6px;text-transform:uppercase;}
+      .statVal{font-weight:950;font-size:20px;margin-top:6px;}
+
+      @media (max-width: 420px){
+        .shell{padding:0;padding-bottom:env(safe-area-inset-bottom);}
+        .frame{border-radius:0;border:0;box-shadow:none;padding:12px;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;}
+        .top{padding:8px 10px 10px 10px;gap:10px;}
+        .brand__mark{width:38px;height:38px;border-radius:12px;}
+        .brand__title{font-size:16px;}
+        .brand__subtitle{font-size:11px;}
+        .badge{padding:8px 12px;}
+        .stage{padding:12px;min-height:0;flex:1;overflow:auto;border-radius:18px;}
+        .foot{padding:10px 12px 14px 12px;}
+        .cta .btn{width:100%;min-width:0;}
+      }
+
+      @supports (height: 100svh){
+        .stage{min-height:min(560px, calc(100svh - 190px));}
+      }
+
+      @media (min-width: 560px){
+        .answers{grid-template-columns:1fr 1fr;}
+      }
+
+      @media (min-width: 760px){
+        .answers{grid-template-columns:1fr 1fr 1fr;}
+        .grid{grid-template-columns: 1fr 1fr 1fr;}
+        .resultGrid{grid-template-columns:1fr 1fr;align-items:stretch;}
+        .stats{grid-template-columns:1fr 1fr;}
+      }
+
+      @media (min-width: 980px){
+        .resultGrid{grid-template-columns:1.1fr .9fr;}
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <div class="frame">
+        <header class="top">
+          <div class="brand">
+            <div class="brand__mark" id="brandMark" aria-hidden="true">NJ</div>
+            <div class="brand__text">
+              <div class="brand__title" id="brandTitle">Ngebut JLPT</div>
+              <div class="brand__subtitle" id="brandSubtitle">Main 10 menit sehari • skor naik, level naik</div>
+            </div>
+          </div>
+          <div class="badge" id="levelBadge">N5</div>
+        </header>
+
+        <section class="stage" id="app" aria-live="polite"></section>
+
+        <footer class="foot">Latihan cepat: baca → pilih → feedback → ulangi. Ada Daftar salah untuk review.</footer>
+      </div>
+    </main>
+
+    <script>
+      const APP_NAME = "Ngebut JLPT"
+      const APP_TAGLINE = "Main 10 menit sehari • skor naik, level naik"
+      const POINTS_PER_CORRECT = 10
+      const SESSION_SIZE_TARGET = 100
+
+
+      function initialsFromName(name){
+        const cleaned = String(name || "").trim()
+        if (!cleaned) return "JP"
+        const parts = cleaned.split(/\s+/g).filter(Boolean)
+        const letters = parts.slice(0, 2).map((p) => p[0] || "")
+        const joined = letters.join("").toUpperCase()
+        return joined || cleaned.slice(0, 2).toUpperCase()
+      }
+
+      function setBrand(){
+        const mark = document.getElementById("brandMark")
+        const title = document.getElementById("brandTitle")
+        const subtitle = document.getElementById("brandSubtitle")
+        if (mark) mark.textContent = initialsFromName(APP_NAME)
+        if (title) title.textContent = APP_NAME
+        if (subtitle) subtitle.textContent = APP_TAGLINE
+      }
+
+      function vocabFromRaw(list){
+        return list
+          .map((s) => String(s).trim())
+          .filter(Boolean)
+          .map((s) => {
+            const parts = s.split("|")
+            return { kanji: parts[0] ?? "", kana: parts[1] ?? "" }
+          })
+          .filter((x) => x.kanji && x.kana)
+      }
+
+      const levels = {
+        n5: {
+          label: "N5",
+          locked: false,
+          aboutJp: "よみかた・かんじ・じょし・ぶんぽう・どっかい",
+          aboutId: "Bacaan, Kanji, Partikel, Pola kalimat, Dokai",
+          vocab: vocabFromRaw([
+            "犬|いぬ","猫|ねこ","鳥|とり","魚|さかな","馬|うま","豚|ぶた","水|みず","本|ほん","学校|がっこう","先生|せんせい","学生|がくせい","時計|とけい","車|くるま","電車|でんしゃ","家|いえ","部屋|へや","友だち|ともだち","お母さん|おかあさん","お父さん|おとうさん",
+            "食べる|たべる","飲む|のむ","行く|いく","来る|くる","見る|みる","読む|よむ","書く|かく","大きい|おおきい","小さい|ちいさい","高い|たかい","安い|やすい","難しい|むずかしい","簡単|かんたん","早い|はやい","遅い|おそい","新しい|あたらしい","古い|ふるい","白い|しろい","黒い|くろい","赤い|あかい","青い|あおい","名前|なまえ","日本|にほん","今|いま","今日|きょう","明日|あした","昨日|きのう","毎日|まいにち","時間|じかん","駅|えき","店|みせ","道|みち","公園|こうえん","病院|びょういん","薬|くすり","電話|でんわ","仕事|しごと","会社|かいしゃ","休み|やすみ","天気|てんき","雨|あめ","雪|ゆき","風|かぜ","山|やま","川|かわ","海|うみ","朝|あさ","昼|ひる","夜|よる","週|しゅう","月曜日|げつようび","火曜日|かようび","水曜日|すいようび","木曜日|もくようび","金曜日|きんようび","土曜日|どようび","日曜日|にちようび","一つ|ひとつ","二つ|ふたつ","三つ|みっつ","四つ|よっつ","五つ|いつつ","六つ|むっつ","七つ|ななつ","八つ|やっつ","九つ|ここのつ","十|じゅう",
+            "手|て","足|あし","目|め","耳|みみ","口|くち","頭|あたま","体|からだ","歩く|あるく","走る|はしる","買う|かう","売る|うる","会う|あう","話す|はなす","聞く|きく","待つ|まつ","入る|はいる","出る|でる","上|うえ","下|した","右|みぎ","左|ひだり","前|まえ","後ろ|うしろ"
+          ]),
+          particleBank: [
+            { s: "わたし（　）がくせいです。", a: "は", choices: ["は", "を", "で"] },
+            { s: "パン（　）たべます。", a: "を", choices: ["を", "は", "に"] },
+            { s: "がっこう（　）いきます。", a: "へ", choices: ["へ", "で", "を"] },
+            { s: "うち（　）かえります。", a: "に", choices: ["に", "を", "へ"] },
+            { s: "ともだち（　）あいます。", a: "に", choices: ["に", "で", "を"] },
+            { s: "えき（　）でんしゃにのります。", a: "で", choices: ["で", "に", "を"] },
+            { s: "いえ（　）ごはんを たべます。", a: "で", choices: ["で", "に", "へ"] },
+            { s: "にちようび（　）やすみです。", a: "は", choices: ["は", "が", "を"] },
+            { s: "わたし（　）ほんを よみます。", a: "は", choices: ["は", "で", "に"] },
+            { s: "みず（　）のみます。", a: "を", choices: ["を", "に", "で"] },
+            { s: "ともだち（　）でんわします。", a: "に", choices: ["に", "を", "で"] },
+            { s: "へや（　）はいります。", a: "に", choices: ["に", "で", "を"] },
+            { s: "くるま（　）のります。", a: "に", choices: ["に", "を", "で"] },
+            { s: "うみ（　）いきます。", a: "へ", choices: ["へ", "で", "に"] },
+            { s: "こうえん（　）あそびます。", a: "で", choices: ["で", "に", "を"] },
+            { s: "いま（　）なんじですか。", a: "は", choices: ["は", "を", "で"] },
+            { s: "ともだち（　）いっしょに いきます。", a: "と", choices: ["と", "に", "で"] },
+            { s: "がっこう（　）べんきょうします。", a: "で", choices: ["で", "に", "を"] },
+            { s: "えいが（　）みたいです。", a: "を", choices: ["を", "に", "で"] },
+            { s: "うち（　）かぞくが います。", a: "に", choices: ["に", "で", "へ"] },
+            { s: "きょう（　）あめが ふります。", a: "は", choices: ["は", "が", "を"] },
+            { s: "にほん（　）いきたいです。", a: "へ", choices: ["へ", "に", "で"] },
+            { s: "あさ（　）コーヒーを のみます。", a: "に", choices: ["に", "で", "を"] },
+            { s: "ともだち（　）てがみを かきます。", a: "に", choices: ["に", "を", "で"] },
+            { s: "へや（　）で ほんを よみます。", a: "で", choices: ["で", "に", "を"] }
+          ],
+          patternBank: [
+            { s: "きのう、えいが（　）みました。", a: "を", choices: ["を", "は", "に"] },
+            { s: "あした、７じ（　）おきます。", a: "に", choices: ["に", "で", "を"] },
+            { s: "すみません、もういちど（　）ください。", a: "いって", choices: ["いって", "いう", "いいます"] },
+            { s: "このほんは（　）です。", a: "おもしろい", choices: ["おもしろい", "おもしろく", "おもしろ"] },
+            { s: "ごはんを たべて、みず（　）のみます。", a: "を", choices: ["を", "に", "で"] },
+            { s: "あめが ふった（　）、いきません。", a: "ら", choices: ["ら", "ので", "のに"] },
+            { s: "（　）から、いそぎましょう。", a: "おそい", choices: ["おそい", "おそく", "おそいに"] },
+            { s: "ここは（　）しずかです。", a: "とても", choices: ["とても", "すこし", "あまり"] },
+            { s: "きょうは あつい（　）、みずを のみます。", a: "から", choices: ["から", "ので", "のに"] },
+            { s: "わたしは にほんご（　）べんきょうします。", a: "を", choices: ["を", "に", "で"] },
+            { s: "ともだちと（　）あそびます。", a: "いっしょに", choices: ["いっしょに", "いっしょ", "いっしょうに"] },
+            { s: "もう（　）よるです。", a: "すぐ", choices: ["すぐ", "すこし", "まだ"] },
+            { s: "あしたは あめ（　）ふるかもしれません。", a: "が", choices: ["が", "を", "で"] },
+            { s: "おんがくを きき（　）ながら べんきょうします。", a: "ながら", choices: ["ながら", "ので", "のに"] },
+            { s: "やすみの ひは、うちで えいがを み（　）します。", a: "たり", choices: ["たり", "て", "から"] },
+            { s: "にほんごが すき（　）から、まいにち べんきょうします。", a: "だ", choices: ["だ", "に", "く"] },
+            { s: "たべ（　）すぎて、 おなかが いたいです。", a: "すぎて", choices: ["すぎて", "すぎる", "すぎ"] },
+            { s: "きのうは ね（　）ませんでした。", a: "られ", choices: ["られ", "る", "た"] },
+            { s: "あさごはんを たべ（　）から、がっこうへ いきます。", a: "て", choices: ["て", "た", "で"] }
+          ],
+          storyBank: [
+            { t: "きょうは あめです。 わたしは うちに います。", q: "だれが うちに いますか。", a: 0, choices: ["わたし", "ともだち", "せんせい"] },
+            { t: "たなかさんは ７じに おきます。 ８じに がっこうへ いきます。", q: "たなかさんは なんじに がっこうへ いきますか。", a: 1, choices: ["７じ", "８じ", "９じ"] },
+            { t: "わたしは えきで ともだちに あいました。 いっしょに みせへ いきました。", q: "どこへ いきましたか。", a: 2, choices: ["びょういん", "こうえん", "みせ"] },
+            { t: "きのうは さむかったです。 きょうは あたたかいです。", q: "きょうの てんきは どうですか。", a: 1, choices: ["さむい", "あたたかい", "あつい"] },
+            { t: "わたしは ほんを よみます。 そのあと ねます。", q: "ほんを よんだあと、なにを しますか。", a: 2, choices: ["はしる", "たべる", "ねる"] },
+            { t: "にちようびは やすみです。 でも、きょうは しごとです。", q: "きょうは どうですか。", a: 1, choices: ["やすみ", "しごと", "りょこう"] },
+            { t: "このみちは ながいです。 あっちの えきは ちかいです。", q: "ちかいのは どれですか。", a: 2, choices: ["このみち", "ながい", "あっちのえき"] },
+            { t: "ともだちは くるまに のります。 わたしは でんしゃに のります。", q: "わたしは なにに のりますか。", a: 1, choices: ["くるま", "でんしゃ", "ひこうき"] },
+            { t: "わたしは まいあさ ６じに おきます。 ７じに あさごはんを たべます。", q: "なんじに あさごはんを たべますか。", a: 1, choices: ["６じ", "７じ", "８じ"] },
+            { t: "ともだちは きょう びょういんへ いきます。 わたしは うちに います。", q: "ともだちは どこへ いきますか。", a: 0, choices: ["びょういん", "がっこう", "こうえん"] },
+            { t: "きょうは とても あついです。 みずを たくさん のみます。", q: "なにを たくさん のみますか。", a: 1, choices: ["おちゃ", "みず", "コーヒー"] },
+            { t: "わたしは しゅうまつに ともだちと えいがを みました。", q: "しゅうまつに なにを しましたか。", a: 2, choices: ["りょこう", "しごと", "えいがを みた"] }
+          ]
+        },
+        n4: {
+          label: "N4",
+          locked: false,
+          aboutJp: "N4 むけ（どっかい ふくむ）",
+          aboutId: "Bank ratusan (draft), siap dijual",
+          vocab: vocabFromRaw([
+            "会社|かいしゃ","仕事|しごと","旅行|りょこう","電気|でんき","料理|りょうり","病院|びょういん","薬|くすり","約束|やくそく","運転|うんてん","注意|ちゅうい","大切|たいせつ","必要|ひつよう","便利|べんり","不便|ふべん","部長|ぶちょう","会議|かいぎ","残業|ざんぎょう","案内|あんない","準備|じゅんび","説明|せつめい",
+            "予約|よやく","予定|よてい","理由|りゆう","連絡|れんらく","方法|ほうほう","習慣|しゅうかん","経験|けいけん","生活|せいかつ","安全|あんぜん","危険|きけん","事故|じこ","交通|こうつう","地図|ちず","季節|きせつ","温度|おんど","台風|たいふう","地震|じしん","問題|もんだい","答え|こたえ","宿題|しゅくだい",
+            "試験|しけん","成績|せいせき","学校|がっこう","教室|きょうしつ","図書館|としょかん","受付|うけつけ","住所|じゅうしょ","番号|ばんごう","財布|さいふ","切符|きっぷ","荷物|にもつ","電車|でんしゃ","地下鉄|ちかてつ","自転車|じてんしゃ","空港|くうこう","乗り物|のりもの","出発|しゅっぱつ","到着|とうちゃく","遅刻|ちこく","連休|れんきゅう",
+            "写真|しゃしん","音楽|おんがく","映画|えいが","趣味|しゅみ","運動|うんどう","散歩|さんぽ","買い物|かいもの","洗濯|せんたく","掃除|そうじ","片付け|かたづけ","引っ越し|ひっこし","相談|そうだん","お願い|おねがい","返事|へんじ","連れて行く|つれていく","迎える|むかえる","見送る|みおくる","支払う|しはらう","払う|はらう","足りる|たりる",
+            "間に合う|まにあう","続ける|つづける","比べる|くらべる","決める|きめる","増える|ふえる","減る|へる","変わる|かわる","変える|かえる","伝える|つたえる","始める|はじめる","始まる|はじまる","終わる|おわる","開ける|あける","閉める|しめる","集める|あつめる","集まる|あつまる","置く|おく","落とす|おとす","忘れる|わすれる","思い出す|おもいだす",
+            "熱い|あつい","寒い|さむい","涼しい|すずしい","忙しい|いそがしい","同じ|おなじ","違う|ちがう","簡単|かんたん","難しい|むずかしい","静か|しずか","賑やか|にぎやか","有名|ゆうめい","親切|しんせつ","元気|げんき","大丈夫|だいじょうぶ","大変|たいへん","必要|ひつよう","自由|じゆう","便利|べんり","不便|ふべん","危ない|あぶない",
+            "具合|ぐあい","用事|ようじ","場所|ばしょ","番組|ばんぐみ","新聞|しんぶん","記事|きじ","連絡先|れんらくさき","書類|しょるい","申込|もうしこみ","窓口|まどぐち","料金|りょうきん","割引|わりびき","特急|とっきゅう","急行|きゅうこう","終電|しゅうでん","遠慮|えんりょ","迷惑|めいわく","注意する|ちゅういする","確認する|かくにんする","説明する|せつめいする",
+            "連絡する|れんらくする","用意する|よういする","準備する|じゅんびする","片付ける|かたづける","手伝う|てつだう","届ける|とどける","拾う|ひろう","落ちる|おちる","間違える|まちがえる","間違い|まちがい","遅れる|おくれる","急ぐ|いそぐ","決まる|きまる","続く|つづく","選ぶ|えらぶ","誘う|さそう","申し訳ない|もうしわけない","確か|たしか","急に|きゅうに","最近|さいきん",
+            "しばらく|しばらく","たいてい|たいてい","やっと|やっと","もし|もし","例えば|たとえば","必ず|かならず","十分|じゅうぶん","ほとんど|ほとんど","それぞれ|それぞれ","すっかり|すっかり","きちんと|きちんと"
+          ]),
+          particleBank: [
+            { s: "ここ（　）たばこを すってはいけません。", a: "で", choices: ["で", "に", "を"] },
+            { s: "このみち（　）まっすぐ いってください。", a: "を", choices: ["を", "で", "に"] },
+            { s: "あした（　）ひまですか。", a: "は", choices: ["は", "を", "で"] },
+            { s: "でんしゃ（　）のって かいしゃへ いきます。", a: "に", choices: ["に", "を", "で"] },
+            { s: "りょこう（　）いきたいです。", a: "に", choices: ["に", "へ", "を"] },
+            { s: "このこと（　）ついて そうだんしたいです。", a: "に", choices: ["に", "で", "を"] },
+            { s: "じかん（　）よって こんざつします。", a: "に", choices: ["に", "を", "で"] },
+            { s: "あめ（　）ふっても いきます。", a: "が", choices: ["が", "を", "で"] },
+            { s: "ここ（　）しゃしんを とっても いいです。", a: "で", choices: ["で", "に", "を"] },
+            { s: "しごと（　）おわったら、かえります。", a: "が", choices: ["が", "を", "で"] },
+            { s: "このへやは ひとが おおい（　）に しずかです。", a: "の", choices: ["の", "が", "を"] },
+            { s: "ここから えき（　）５ふんぐらいです。", a: "まで", choices: ["まで", "に", "を"] },
+            { s: "かいしゃ（　）でんわして ください。", a: "に", choices: ["に", "へ", "で"] },
+            { s: "あめ（　）でも、さんぽします。", a: "の", choices: ["の", "が", "を"] },
+            { s: "せんせい（　）きいてみます。", a: "に", choices: ["に", "で", "を"] },
+            { s: "このことは だれ（　）も しりません。", a: "に", choices: ["に", "を", "で"] }
+          ],
+          patternBank: [
+            { s: "あめが ふった（　）、いきません。", a: "ら", choices: ["ら", "ので", "のに"] },
+            { s: "じかんが ない（　）、いそぎましょう。", a: "から", choices: ["から", "ので", "のに"] },
+            { s: "このくつは かる（　）くて、はきやすいです。", a: "く", choices: ["く", "い", "に"] },
+            { s: "もう いちど せつめいして（　）ませんか。", a: "もらえ", choices: ["もらえ", "もらう", "もらいます"] },
+            { s: "あたまが いたい（　）、びょういんへ いきます。", a: "ので", choices: ["ので", "のに", "のを"] },
+            { s: "このほんは おもしろ（　）です。", a: "い", choices: ["い", "く", "に"] },
+            { s: "やくそくの じかんに まにあわ（　）でした。", a: "なかっ", choices: ["なかっ", "ない", "なかったに"] },
+            { s: "おかねが たり（　）ので、かえません。", a: "ない", choices: ["ない", "なく", "なかった"] },
+            { s: "いそがしい（　）けれど、いきます。", a: "けれど", choices: ["けれど", "ので", "のに"] },
+            { s: "ここに すわって（　）いいですか。", a: "も", choices: ["も", "を", "で"] },
+            { s: "かぜを ひいた（　）、やすみます。", a: "ので", choices: ["ので", "のに", "のを"] },
+            { s: "しゅくだいを だし（　）わすれました。", a: "て", choices: ["て", "た", "で"] },
+            { s: "たべ（　）すぎないでください。", a: "すぎ", choices: ["すぎ", "すぎて", "すぎる"] }
+          ],
+          storyBank: [
+            { t: "きのう、わたしは びょういんへ いきました。 くすりを もらいました。", q: "わたしは なにを もらいましたか。", a: 2, choices: ["きっぷ", "にもつ", "くすり"] },
+            { t: "みせは ９じから ６じまでです。 にちようびは やすみです。", q: "みせは いつ やすみですか。", a: 1, choices: ["どようび", "にちようび", "げつようび"] },
+            { t: "あした かいぎが あります。 ８じまでに きてください。", q: "なんじまでに きますか。", a: 0, choices: ["８じ", "９じ", "１０じ"] },
+            { t: "たなかさんは まいにち ざんぎょうします。 とても いそがしいです。", q: "たなかさんは どうですか。", a: 2, choices: ["ひま", "げんき", "いそがしい"] },
+            { t: "このへやは しずかです。 あのへやは にぎやかです。", q: "しずかなのは どれですか。", a: 0, choices: ["このへや", "あのへや", "どちらも"] },
+            { t: "でんきが つきません。 すみませんが みてください。", q: "なにが つきませんか。", a: 1, choices: ["みず", "でんき", "くすり"] },
+            { t: "りょこうの じゅんびを しています。 にもつを あつめています。", q: "いま なにを していますか。", a: 2, choices: ["そうじ", "うんてん", "じゅんび"] },
+            { t: "しゃしんを とるのが しゅみです。 まいしゅう こうえんへ いきます。", q: "どこへ いきますか。", a: 0, choices: ["こうえん", "びょういん", "かいしゃ"] },
+            { t: "でんしゃが おくれました。 だから ちこくしました。", q: "どうして ちこくしましたか。", a: 1, choices: ["あめ", "でんしゃが おくれた", "やすみ"] },
+            { t: "きょうは たいふうです。 そとに でないでください。", q: "なにを しては いけませんか。", a: 2, choices: ["ねる", "たべる", "そとに でる"] },
+            { t: "らいしゅう ひっこしを します。 きょうは にもつを かたづけています。", q: "きょう していることは どれですか。", a: 1, choices: ["りょこう", "かたづけ", "ざんぎょう"] },
+            { t: "でんしゃが こんでいたので、つかれました。 でも、まにあいました。", q: "どうして つかれましたか。", a: 0, choices: ["こんでいた", "やすみだった", "あめだった"] },
+            { t: "このあたりは よる とても しずかです。 ひるは にぎやかです。", q: "よるは どうですか。", a: 2, choices: ["にぎやか", "あぶない", "しずか"] }
+          ]
+        },
+        n3: {
+          label: "N3",
+          locked: false,
+          aboutJp: "N3 むけ（どっかい ふくむ）",
+          aboutId: "Bank ratusan (draft), siap dijual",
+          vocab: vocabFromRaw([
+            "経験|けいけん","判断|はんだん","関係|かんけい","場合|ばあい","原因|げんいん","結果|けっか","責任|せきにん","連絡|れんらく","申請|しんせい","手続き|てつづき","確認|かくにん","改善|かいぜん","対応|たいおう","条件|じょうけん","効率|こうりつ","重要|じゅうよう","詳細|しょうさい","必要|ひつよう","提案|ていあん","影響|えいきょう",
+            "参加|さんか","協力|きょうりょく","理解|りかい","説明|せつめい","連続|れんぞく","変化|へんか","成長|せいちょう","成功|せいこう","失敗|しっぱい","注意|ちゅうい","安全|あんぜん","危険|きけん","確認する|かくにんする","利用する|りようする","準備する|じゅんびする","連絡する|れんらくする","お願いする|おねがいする","断る|ことわる","助ける|たすける","助かる|たすかる",
+            "続ける|つづける","比べる|くらべる","決める|きめる","選ぶ|えらぶ","伝える|つたえる","進める|すすめる","進む|すすむ","求める|もとめる","守る|まもる","増える|ふえる","減る|へる","変える|かえる","変わる|かわる","失う|うしなう","得る|える","認める|みとめる","支える|ささえる","表す|あらわす","受け取る|うけとる","取り消す|とりけす",
+            "普段|ふだん","最近|さいきん","当然|とうぜん","特に|とくに","非常に|ひじょうに","必ず|かならず","多分|たぶん","殆ど|ほとんど","恐らく|おそらく","若し|もし","それぞれ|それぞれ","十分|じゅうぶん","簡単|かんたん","複雑|ふくざつ","大切|たいせつ","可能|かのう","不可能|ふかのう","必要|ひつよう","無理|むり","自由|じゆう",
+            "事実|じじつ","意見|いけん","目的|もくてき","計画|けいかく","方法|ほうほう","条件|じょうけん","状況|じょうきょう","変化|へんか","理由|りゆう","約束|やくそく","相談|そうだん","資料|しりょう","報告|ほうこく",
+            "環境|かんきょう","情報|じょうほう","特徴|とくちょう","目的|もくてき","方針|ほうしん","課題|かだい","解決|かいけつ","原因|げんいん","結果|けっか","効果|こうか","影響|えいきょう","対策|たいさく","状況|じょうきょう","条件|じょうけん","立場|たちば","役割|やくわり","責任|せきにん","可能性|かのうせい","必要性|ひつようせい","重要性|じゅうようせい",
+            "基本|きほん","具体的|ぐたいてき","一般的|いっぱんてき","平均|へいきん","割合|わりあい","傾向|けいこう","比較|ひかく","調整|ちょうせい","確認|かくにん","連絡|れんらく","相談|そうだん","依頼|いらい","要望|ようぼう","提案|ていあん","説明|せつめい","報告|ほうこく","通知|つうち","指示|しじ","手配|てはい","準備|じゅんび",
+            "手続き|てつづき","申請|しんせい","登録|とうろく","変更|へんこう","延期|えんき","中止|ちゅうし","終了|しゅうりょう","開始|かいし","参加|さんか","欠席|けっせき","出席|しゅっせき","出張|しゅっちょう","訪問|ほうもん","連休|れんきゅう","予定|よてい","計画|けいかく","見込み|みこみ","見通し|みとおし","判断|はんだん","決定|けってい",
+            "選択|せんたく","工夫|くふう","努力|どりょく","改善|かいぜん","対応|たいおう","反対|はんたい","賛成|さんせい","意見|いけん","印象|いんしょう","感想|かんそう","評価|ひょうか","感覚|かんかく","心理|しんり","不安|ふあん","安心|あんしん","緊張|きんちょう","我慢|がまん","納得|なっとく","誤解|ごかい","理解|りかい",
+            "関心|かんしん","興味|きょうみ","経験|けいけん","知識|ちしき","技術|ぎじゅつ","能力|のうりょく","資格|しかく","条件|じょうけん","基準|きじゅん","規則|きそく","法律|ほうりつ","制度|せいど","申込|もうしこみ","契約|けいやく","料金|りょうきん","費用|ひよう","予算|よさん","割引|わりびき","利益|りえき","損|そん",
+            "商品|しょうひん","サービス|さーびす","顧客|こきゃく","注文|ちゅうもん","支払い|しはらい","請求|せいきゅう","領収書|りょうしゅうしょ","確認する|かくにんする","説明する|せつめいする","連絡する|れんらくする","相談する|そうだんする","依頼する|いらいする","対応する|たいおうする","改善する|かいぜんする","判断する|はんだんする","決定する|けっていする","選択する|せんたくする",
+            "知らせる|しらせる","伝える|つたえる","頼む|たのむ","任せる|まかせる","進める|すすめる","進む|すすむ","取り組む|とりくむ","続ける|つづける","比べる|くらべる","求める|もとめる","守る|まもる","支える|ささえる","増やす|ふやす","減らす|へらす","確かめる|たしかめる","取り消す|とりけす","間に合う|まにあう","気をつける|きをつける",
+            "例えば|たとえば","つまり|つまり","さらに|さらに","しかし|しかし","一方|いっぽう","そのため|そのため","たしかに|たしかに","もちろん|もちろん","結局|けっきょく","最初|さいしょ","途中|とちゅう","最後|さいご","以前|いぜん","以後|いご","最近|さいきん","普段|ふだん","当日|とうじつ","翌日|よくじつ","先ほど|さきほど","それぞれ|それぞれ"
+          ]),
+          particleBank: [
+            { s: "じかんに よって（　）こんざつします。", a: "は", choices: ["は", "を", "に"] },
+            { s: "このけっかは きたいした（　）では ありません。", a: "とおり", choices: ["とおり", "ほど", "ほどに"] },
+            { s: "しごと（　）かんして しつもんが あります。", a: "に", choices: ["に", "を", "で"] },
+            { s: "ばあい（　）よって たいおうが かわります。", a: "に", choices: ["に", "で", "を"] },
+            { s: "このもんだい（　）ついて せつめいします。", a: "に", choices: ["に", "で", "を"] },
+            { s: "けっか（　）えいきょうします。", a: "に", choices: ["に", "を", "で"] },
+            { s: "じょうきょう（　）おうじて ほうしんを かえます。", a: "に", choices: ["に", "で", "を"] },
+            { s: "このもんだい（　）かんして いけんが あります。", a: "に", choices: ["に", "を", "で"] },
+            { s: "きかく（　）ついて もうすこし せつめいします。", a: "に", choices: ["に", "で", "を"] },
+            { s: "けいかくどおり（　）いけば、だいじょうぶです。", a: "に", choices: ["に", "を", "で"] },
+            { s: "そのけっか（　）よって、たいおうが かわります。", a: "に", choices: ["に", "で", "を"] }
+          ],
+          patternBank: [
+            { s: "このしごとは かんたん（　）みえますが、むずかしいです。", a: "に", choices: ["に", "な", "だ"] },
+            { s: "やくそくの じかん（　）まにあいませんでした。", a: "に", choices: ["に", "を", "で"] },
+            { s: "あしたの かいぎは（　）おくれるかもしれません。", a: "すこし", choices: ["すこし", "すこしに", "すこしだ"] },
+            { s: "じかんが あれば、てつだって（　）ませんか。", a: "くれ", choices: ["くれ", "くれる", "くれます"] },
+            { s: "このけっかは だれに（　）えいきょうします。", a: "も", choices: ["も", "を", "に"] },
+            { s: "しりょうを かくにん（　）から、れんらくします。", a: "して", choices: ["して", "する", "します"] },
+            { s: "このほうほうは べんり（　）ようです。", a: "な", choices: ["な", "に", "だ"] },
+            { s: "そのけっか、よそう（　）とおりに なりました。", a: "した", choices: ["した", "する", "して"] },
+            { s: "しめきりまでに ていしゅつ（　）ないと いけません。", a: "し", choices: ["し", "する", "して"] },
+            { s: "じょうけんを みた（　）うえで、はんだんします。", a: "うえ", choices: ["うえ", "ので", "のに"] }
+          ],
+          storyBank: [
+            { t: "しゅくだいを わすれたので、せんせいに あやまりました。 つぎから きをつけます。", q: "どうして あやまりましたか。", a: 0, choices: ["しゅくだいを わすれた", "じかんが ない", "ねむかった"] },
+            { t: "このしょるいは きょうじゅうに ていしゅつしてください。 おくれるばあいは れんらくが ひつようです。", q: "おくれるとき、なにを しなければ なりませんか。", a: 2, choices: ["ていしゅつしない", "まつ", "れんらくする"] },
+            { t: "かいぎの ないようを みんなに せつめいしました。 そのあと、しりょうを おくりました。", q: "せつめいしたあと、なにを しましたか。", a: 1, choices: ["やすんだ", "しりょうを おくった", "でんわした"] },
+            { t: "けっかは よかったですが、まだ かいぜんが ひつようです。", q: "なにが ひつようですか。", a: 0, choices: ["かいぜん", "やすみ", "しゅくだい"] },
+            { t: "じょうけんを かくにんしてから、もういちど ていあんします。", q: "なにを してから ていあんしますか。", a: 2, choices: ["ねる", "でかける", "かくにんする"] },
+            { t: "このばあいは たいおうが ちがいます。 けいけんが だいじです。", q: "なにが だいじですか。", a: 1, choices: ["じかん", "けいけん", "でんしゃ"] },
+            { t: "しめきりが ちかいので、きょうちゅうに じゅんびを おわらせます。 もし おくれるばあいは すぐ れんらくします。", q: "おくれるとき、なにを しますか。", a: 2, choices: ["まつ", "なにもしない", "すぐ れんらくする"] },
+            { t: "かくにんしたところ、しりょうに まちがいが ありました。 そのため すぐ なおしました。", q: "どうして なおしましたか。", a: 1, choices: ["ひまだから", "まちがいが あったから", "わすれたから"] },
+            { t: "さいしょは かんたんだと おもいましたが、じっさいは ふくざつでした。 けっきょく みんなで きょうりょくしました。", q: "けっきょく どうしましたか。", a: 2, choices: ["やめた", "ひとりで した", "きょうりょくした"] }
+          ]
+        }
+      }
+
+      const correctMessages = ["せいかい！ (Benar) +10","いいね！ (Bagus) +10","そのとおり！ (Tepat) +10","やった！ (Mantap) +10"]
+      const wrongMessages = ["ざんねん… (Sayang)","ちがいます。 (Salah)","もういちど かくにん。 (Coba lagi)","つぎ いこう。 (Lanjut)"]
+
+      function levelStats(lv){
+        const vocabCount = lv.vocab.length
+        const particleCount = lv.particleBank.length
+        const patternCount = lv.patternBank.length
+        const storyCount = lv.storyBank.length
+        const poolCount = (vocabCount * 2) + particleCount + patternCount + storyCount
+        return { vocabCount, particleCount, patternCount, storyCount, poolCount }
+      }
+
+      function rand(list){
+        return list[Math.floor(Math.random() * list.length)]
+      }
+
+      function shuffle(arr){
+        const a = [...arr]
+        for (let i = a.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1))
+          const tmp = a[i]
+          a[i] = a[j]
+          a[j] = tmp
+        }
+        return a
+      }
+
+      function pickDistinctIndices(poolLength, count, excludedIndex){
+        const indices = []
+        while (indices.length < count) {
+          const next = Math.floor(Math.random() * poolLength)
+          if (next === excludedIndex) continue
+          if (indices.includes(next)) continue
+          indices.push(next)
+        }
+        return indices
+      }
+
+      function optionClassByIndex(i){
+        if (i === 0) return "btn btn--a"
+        if (i === 1) return "btn btn--b"
+        return "btn btn--c"
+      }
+
+      function makeReadingQuestion(levelKey, item, itemIndex, index){
+        const level = levels[levelKey]
+        const vocab = level.vocab
+        const distractorIndices = pickDistinctIndices(vocab.length, 2, itemIndex)
+        const choices = [item.kana, ...distractorIndices.map((i) => vocab[i].kana)]
+        const shuffled = shuffle(choices)
+        const letters = ["A", "B", "C"]
+        const options = shuffled.map((t, i) => ({ id: letters[i], text: t }))
+        const correctOptionId = options.find((o) => o.text === item.kana)?.id ?? "A"
+        return {
+          id: `${levelKey}-reading-${String(index + 1).padStart(4, "0")}`,
+          type: "reading",
+          typeLabel: "よみかた / Bacaan",
+          prompt: { primary: item.kanji, secondary: "（　）" },
+          questionText: `「${item.kanji}」の よみかたは どれですか。`,
+          questionSub: "Pilih hiragana yang benar (ひらがなをえらんでください)。",
+          options,
+          correctOptionId,
+          feedbackCorrect: `${item.kanji}（${item.kana}）`
+        }
+      }
+
+      function makeKanjiQuestion(levelKey, item, itemIndex, index){
+        const level = levels[levelKey]
+        const vocab = level.vocab
+        const distractorIndices = pickDistinctIndices(vocab.length, 2, itemIndex)
+        const choices = [item.kanji, ...distractorIndices.map((i) => vocab[i].kanji)]
+        const shuffled = shuffle(choices)
+        const letters = ["A", "B", "C"]
+        const options = shuffled.map((t, i) => ({ id: letters[i], text: t }))
+        const correctOptionId = options.find((o) => o.text === item.kanji)?.id ?? "A"
+        return {
+          id: `${levelKey}-kanji-${String(index + 1).padStart(4, "0")}`,
+          type: "kanji",
+          typeLabel: "かんじ / Kanji",
+          prompt: { primary: item.kana, secondary: "（　）" },
+          questionText: `「${item.kana}」を かんじで かくと どれですか。`,
+          questionSub: "Pilih kanji yang benar (かんじをえらんでください)。",
+          options,
+          correctOptionId,
+          feedbackCorrect: `${item.kanji}（${item.kana}）`
+        }
+      }
+
+      function makeParticleQuestion(levelKey, entry, index){
+        const letters = ["A", "B", "C"]
+        const opts = shuffle(entry.choices).slice(0, 3)
+        const options = opts.map((t, i) => ({ id: letters[i], text: t }))
+        const correctOptionId = options.find((o) => o.text === entry.a)?.id ?? "A"
+        return {
+          id: `${levelKey}-particle-${String(index + 1).padStart(4, "0")}`,
+          type: "particle",
+          typeLabel: "じょし / Partikel",
+          prompt: { primary: entry.s, secondary: "（　）" },
+          questionText: "（　）に はいる じょしは どれですか。",
+          questionSub: "Pilih partikel yang tepat (ひらがなをえらんでください)。",
+          options,
+          correctOptionId,
+          feedbackCorrect: `${entry.a}`
+        }
+      }
+
+      function makePatternQuestion(levelKey, entry, index){
+        const letters = ["A", "B", "C"]
+        const opts = shuffle(entry.choices).slice(0, 3)
+        const options = opts.map((t, i) => ({ id: letters[i], text: t }))
+        const correctOptionId = options.find((o) => o.text === entry.a)?.id ?? "A"
+        return {
+          id: `${levelKey}-pattern-${String(index + 1).padStart(4, "0")}`,
+          type: "pattern",
+          typeLabel: "ぶんぽう / Pola kalimat",
+          prompt: { primary: entry.s, secondary: "（　）" },
+          questionText: "（　）に はいる ことばは どれですか。",
+          questionSub: "Pilih kata/frasa yang tepat (ことばをえらんでください)。",
+          options,
+          correctOptionId,
+          feedbackCorrect: `${entry.a}`
+        }
+      }
+
+      function makeStoryQuestion(levelKey, entry, index){
+        const letters = ["A", "B", "C"]
+        const opts = shuffle(entry.choices).slice(0, 3)
+        const options = opts.map((t, i) => ({ id: letters[i], text: t }))
+        const correctOptionId = options.find((o) => o.text === entry.choices[entry.a])?.id ?? "A"
+        return {
+          id: `${levelKey}-story-${String(index + 1).padStart(4, "0")}`,
+          type: "story",
+          typeLabel: "どっかい / Dokai",
+          prompt: { primary: entry.t, secondary: "Bacaan pendek" },
+          questionText: entry.q,
+          questionSub: "Baca teks, lalu pilih jawaban yang tepat.",
+          options,
+          correctOptionId,
+          feedbackCorrect: `${entry.choices[entry.a]}`
+        }
+      }
+
+      function buildQuestionPool(levelKey){
+        const level = levels[levelKey]
+        const pool = []
+        for (let i = 0; i < level.vocab.length; i += 1) {
+          pool.push(makeReadingQuestion(levelKey, level.vocab[i], i, pool.length))
+          pool.push(makeKanjiQuestion(levelKey, level.vocab[i], i, pool.length))
+        }
+        for (let i = 0; i < level.particleBank.length; i += 1) {
+          pool.push(makeParticleQuestion(levelKey, level.particleBank[i], pool.length))
+        }
+        for (let i = 0; i < level.patternBank.length; i += 1) {
+          pool.push(makePatternQuestion(levelKey, level.patternBank[i], pool.length))
+        }
+        for (let i = 0; i < level.storyBank.length; i += 1) {
+          pool.push(makeStoryQuestion(levelKey, level.storyBank[i], pool.length))
+        }
+        return pool
+      }
+
+      const app = document.getElementById("app")
+      const levelBadge = document.getElementById("levelBadge")
+
+      const state = {
+        screen: "start",
+        levelKey: "n5",
+        mode: "normal",
+        sessionQuestions: [],
+        questionIndex: 0,
+        score: 0,
+        feedback: null,
+        wrongList: [],
+        savedWrongList: [],
+        overlay: null
+      }
+
+      function setBadge(){
+        const label = levels[state.levelKey]?.label ?? "N5"
+        levelBadge.textContent = label
+        document.title = `${APP_NAME} (${label})`
+      }
+
+      function currentQuestion(){
+        return state.sessionQuestions[state.questionIndex]
+      }
+
+      function recordWrong(q, selectedText, correctText){
+        const existing = state.wrongList.find((x) => x.qId === q.id)
+        if (!existing) {
+          state.wrongList.push({ qId: q.id, q, selectedText, correctText, count: 1 })
+          return
+        }
+        existing.count += 1
+        existing.selectedText = selectedText
+        existing.correctText = correctText
+      }
+
+      function buildWrongReviewQuestions(){
+        const base = state.savedWrongList.length ? state.savedWrongList : state.wrongList
+        const uniq = []
+        const seen = new Set()
+        for (const item of base) {
+          const id = item.q?.id
+          if (!id) continue
+          if (seen.has(id)) continue
+          seen.add(id)
+          uniq.push(item.q)
+        }
+        return shuffle(uniq)
+      }
+
+      function buildSessionQuestions(){
+        const pool = buildQuestionPool(state.levelKey)
+        const size = Math.min(Math.max(SESSION_SIZE_TARGET, 100), 200)
+        const shuffled = shuffle(pool)
+        if (shuffled.length >= size) return shuffled.slice(0, size)
+        const out = []
+        while (out.length < size) {
+          out.push(shuffled[out.length % shuffled.length])
+        }
+        return out
+      }
+
+      function startWrongReview(){
+        state.mode = "reviewWrong"
+        state.screen = "quiz"
+        state.sessionQuestions = buildWrongReviewQuestions()
+        state.questionIndex = 0
+        state.score = 0
+        state.feedback = null
+        state.wrongList = []
+        state.overlay = null
+        setBadge()
+        render()
+      }
+
+      function resetGame(){
+        state.screen = "start"
+        state.mode = "normal"
+        state.questionIndex = 0
+        state.score = 0
+        state.feedback = null
+        state.wrongList = []
+        state.savedWrongList = []
+        state.overlay = null
+        setBadge()
+        render()
+      }
+
+      function startGame(){
+        state.screen = "quiz"
+        state.mode = "normal"
+        state.sessionQuestions = buildSessionQuestions()
+        state.questionIndex = 0
+        state.score = 0
+        state.feedback = null
+        state.wrongList = []
+        state.savedWrongList = []
+        state.overlay = null
+        setBadge()
+        render()
+      }
+
+      function showOverlay(kind){
+        state.overlay = kind
+        render()
+      }
+
+      function closeOverlay(){
+        state.overlay = null
+        render()
+      }
+
+      function resultMessage(score, maxScore){
+        const ratio = maxScore === 0 ? 0 : score / maxScore
+        if (ratio >= 0.9) return "すごい！ (Luar biasa)"
+        if (ratio >= 0.75) return "いいね！ (Bagus sekali)"
+        if (ratio >= 0.55) return "だいじょうぶ。 (Terus latihan)"
+        return "あせらないで。 (Pelan-pelan ya)"
+      }
+
+      function renderStart(){
+        const totalQuestions = SESSION_SIZE_TARGET
+        const maxScore = totalQuestions * POINTS_PER_CORRECT
+
+        const cards = Object.entries(levels)
+          .map(([key, lv]) => {
+            const lock = lv.locked
+            const lockText = lock ? "🔒" : "✅"
+            const title = `${lv.label}`
+            const desc = `${lv.aboutJp} / ${lv.aboutId}`
+            const st = levelStats(lv)
+            return `
+              <div class="level">
+                <div class="level__top">
+                  <div>
+                    <div class="level__name">${title}</div>
+                    <div class="level__desc">${desc}</div>
+                    <div class="level__meta">
+                      <div class="tag">Bank: <b>${st.poolCount}</b> soal</div>
+                      <div class="tag">Vocab: <b>${st.vocabCount}</b> (x2)</div>
+                      <div class="tag">Partikel: <b>${st.particleCount}</b></div>
+                      <div class="tag">Bunpou: <b>${st.patternCount}</b></div>
+                      <div class="tag">Dokai: <b>${st.storyCount}</b></div>
+                    </div>
+                  </div>
+                  <div class="level__lock" aria-hidden="true">${lockText}</div>
+                </div>
+                <button class="btn" data-action="pick-level" data-level="${key}">
+                  <span class="btn__label">Pilih ${lv.label}${lock ? " (Terkunci)" : ""}</span>
+                </button>
+              </div>
+            `
+          })
+          .join("")
+
+        app.innerHTML = `
+          <div class="panel">
+            <div class="hero">
+              <div class="hero__h">${APP_NAME}</div>
+              <div class="hero__p">
+                ${APP_TAGLINE}. Sesi <b>${totalQuestions}</b> soal. Benar: <b>+${POINTS_PER_CORRECT}</b> (maks. <b>${maxScore}</b>).<br/>
+                N5 dibuat lebih menantang dengan variasi vocab/partikel/bunpou/dokai yang lebih banyak.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div class="pill">Level aktif <span class="pill__muted">${levels[state.levelKey].label}</span></div>
+                <div class="pill">Mode <span class="pill__muted">Normal</span></div>
+              </div>
+              <div class="q__sub" style="margin-top:10px">N4 & N3 sudah terbuka. Bank soalnya besar (ratusan+) dan bisa kamu review/rapikan.</div>
+            </div>
+
+            <div class="grid">${cards}</div>
+
+            <div class="cta">
+              <button class="btn" data-action="start"><span class="btn__label">スタート / Mulai</span></button>
+            </div>
+          </div>
+        `
+
+        if (state.overlay === "locked") {
+          const overlay = document.createElement("div")
+          overlay.className = "overlay"
+          overlay.innerHTML = `
+            <div class="overlay__card">
+              <div class="hero" style="padding:6px 6px 0 6px">
+                <div class="hero__h" style="font-size:26px">Info level</div>
+                <div class="hero__p">Semua level sudah terbuka. Pilih level yang kamu mau.</div>
+              </div>
+              <div class="card">
+                <div class="q">Pilih level</div>
+                <div class="q__sub">Bank soal N4/N3 sudah disiapkan dalam jumlah besar dan bisa kamu review.</div>
+              </div>
+              <div class="cta">
+                <button class="btn" data-action="close-overlay"><span class="btn__label">OK</span></button>
+              </div>
+            </div>
+          `
+          app.appendChild(overlay)
+        }
+      }
+
+      function renderQuiz(){
+        const q = currentQuestion()
+        const index = state.questionIndex
+        const total = state.sessionQuestions.length
+
+        const optionsHtml = q.options
+          .map((opt, i) => {
+            const isLocked = Boolean(state.feedback)
+            const isSelected = state.feedback?.selectedId === opt.id
+            const isCorrect = state.feedback?.correctId === opt.id
+
+            let extra = ""
+            if (state.feedback && isSelected && state.feedback.isCorrect) extra = " btn--right"
+            if (state.feedback && isSelected && !state.feedback.isCorrect) extra = " btn--wrong"
+            if (state.feedback && !isSelected && isCorrect) extra = " btn--right"
+
+            return `
+              <button class="${optionClassByIndex(i)}${extra}" data-action="answer" data-option-id="${opt.id}" ${isLocked ? "disabled" : ""}>
+                <div class="btn__top">
+                  <div class="btn__label">${opt.text}</div>
+                  <div class="btn__tag" aria-hidden="true">${opt.id}</div>
+                </div>
+              </button>
+            `
+          })
+          .join("")
+
+        const feedbackHtml = state.feedback
+          ? (() => {
+              const isCorrect = state.feedback.isCorrect
+              const title = isCorrect ? "せいかい (Benar)" : "ちがいます (Salah)"
+              const body = isCorrect
+                ? rand(correctMessages)
+                : `${rand(wrongMessages)}<br/>こたえ (Jawaban): <b>${state.feedback.correctText}</b>`
+
+              return `
+                <div class="feedback" role="status" aria-live="polite">
+                  <div class="feedback__h">${title}</div>
+                  <div class="feedback__p">${body}</div>
+                  <div class="cta">
+                    <button class="btn" data-action="next"><span class="btn__label">つぎへ / Lanjut</span></button>
+                    <button class="small" data-action="restart">Ulang</button>
+                    <button class="small" data-action="reset">Halaman awal</button>
+                  </div>
+                </div>
+              `
+            })()
+          : ``
+
+        const primary = q.prompt?.primary ?? ""
+        const secondary = q.prompt?.secondary ?? ""
+
+        app.innerHTML = `
+          <div class="panel">
+            <div class="row">
+              <div class="pill">Soal <span class="pill__muted">${index + 1}</span> / <span class="pill__muted">${total}</span></div>
+              <div class="pill">Level <span class="pill__muted">${levels[state.levelKey].label}</span></div>
+              <div class="pill pill--type">${q.typeLabel}</div>
+              <div class="pill">Skor <span class="pill__muted">${state.score}</span></div>
+              <button class="small" data-action="restart">Ulang</button>
+              <button class="small" data-action="reset">Halaman awal</button>
+            </div>
+
+            <div class="progress" aria-hidden="true"><div class="progress__bar" style="width:${Math.round(((index + 1) / total) * 100)}%"></div></div>
+
+            <div class="card">
+              <div class="prompt">
+                <div class="prompt__primary">${primary}</div>
+                <div class="prompt__secondary">${secondary}</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="q">${q.questionText}</div>
+              <div class="q__sub">${q.questionSub}</div>
+            </div>
+
+            <div class="answers">${optionsHtml}</div>
+
+            ${feedbackHtml}
+          </div>
+        `
+      }
+
+      function renderWrongList(){
+        const list = state.savedWrongList.length ? state.savedWrongList : state.wrongList
+        const totalWrong = list.reduce((acc, x) => acc + (x.count ?? 0), 0)
+
+        const itemsHtml = list
+          .map((it) => {
+            const q = it.q
+            const type = q?.typeLabel ?? ""
+            const p1 = q?.prompt?.primary ?? ""
+            const p2 = q?.prompt?.secondary ?? ""
+            const qt = q?.questionText ?? ""
+            const sel = it.selectedText ?? ""
+            const cor = it.correctText ?? ""
+            const count = it.count ?? 1
+
+            return `
+              <div class="card">
+                <div class="row" style="justify-content:space-between">
+                  <div class="pill pill--type">${type}</div>
+                  <div class="pill">× <span class="pill__muted">${count}</span></div>
+                </div>
+                <div style="height:10px"></div>
+                <div class="q">${qt}</div>
+                <div class="q__sub">${p1} ${p2}</div>
+                <div style="height:10px"></div>
+                <div class="q__sub">Jawaban kamu: <b>${sel}</b></div>
+                <div class="q__sub">Jawaban benar: <b>${cor}</b></div>
+              </div>
+            `
+          })
+          .join("")
+
+        app.innerHTML = `
+          <div class="panel">
+            <div class="hero">
+              <div class="hero__h">まちがいリスト (Daftar Salah)</div>
+              <div class="hero__p">Total salah: <b>${totalWrong}</b> / item: <b>${list.length}</b></div>
+            </div>
+
+            ${list.length ? itemsHtml : `<div class="card"><div class="q" style="text-align:center">Belum ada jawaban salah.</div></div>`}
+
+            <div class="cta">
+              <button class="btn" data-action="review-wrong" ${list.length ? "" : "disabled"}><span class="btn__label">Ulangi yang salah</span></button>
+              <button class="small" data-action="back-result">Kembali</button>
+              <button class="small" data-action="reset">Halaman awal</button>
+            </div>
+          </div>
+        `
+      }
+
+      function renderResult(){
+        const total = state.sessionQuestions.length
+        const maxScore = total * POINTS_PER_CORRECT
+        const msg = resultMessage(state.score, maxScore)
+        const correctCount = Math.round(state.score / POINTS_PER_CORRECT)
+        const wrongCount = state.wrongList.reduce((acc, x) => acc + (x.count ?? 0), 0)
+        const accuracy = total ? Math.round((correctCount / total) * 100) : 0
+        const st = levelStats(levels[state.levelKey])
+        const ringBg = `conic-gradient(rgba(69,230,182,.95) ${accuracy}%, rgba(255,255,255,.10) 0)`
+
+        app.innerHTML = `
+          <div class="panel">
+            <div class="resultGrid">
+              <div class="nb-card">
+                <div class="resultHero">
+                  <div>
+                    <div class="statKey">Result</div>
+                    <div class="scoreBig">${state.score}</div>
+                    <div class="scoreSub">/ ${maxScore} • Akurasi ${accuracy}%</div>
+                    <div class="q__sub" style="margin-top:10px">${msg}</div>
+                  </div>
+                  <div class="ring" style="background:${ringBg}">
+                    <div class="ring__inner"><div class="ring__pct">${accuracy}%</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stats">
+                <div class="nb-card">
+                  <div class="statKey">Level</div>
+                  <div class="statVal">${levels[state.levelKey].label}</div>
+                  <div class="q__sub">Bank: <b>${st.poolCount}</b> soal</div>
+                </div>
+                <div class="nb-card">
+                  <div class="statKey">Benar</div>
+                  <div class="statVal">${correctCount}</div>
+                  <div class="q__sub">+${POINTS_PER_CORRECT} per soal</div>
+                </div>
+                <div class="nb-card">
+                  <div class="statKey">Salah</div>
+                  <div class="statVal">${wrongCount}</div>
+                  <button class="small" data-action="wrong-list" ${wrongCount ? "" : "disabled"} style="margin-top:10px">Daftar salah</button>
+                </div>
+                <div class="nb-card">
+                  <div class="statKey">Next</div>
+                  <div class="statVal">N4 / N3</div>
+                  <div class="q__sub">Coba level lebih tinggi</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cta">
+              <button class="btn" data-action="start"><span class="btn__label">Main lagi</span></button>
+              <button class="btn" data-action="review-wrong" ${wrongCount ? "" : "disabled"}><span class="btn__label">Ulangi yang salah</span></button>
+              <button class="small" data-action="reset">Halaman awal</button>
+            </div>
+          </div>
+        `
+      }
+
+      function render(){
+        if (state.screen === "start") {
+          renderStart()
+          return
+        }
+
+        if (state.screen === "quiz") {
+          renderQuiz()
+          return
+        }
+
+        if (state.screen === "wrongList") {
+          renderWrongList()
+          return
+        }
+
+        renderResult()
+      }
+
+      function onAnswer(optionId){
+        const q = currentQuestion()
+        const correctOpt = q.options.find((o) => o.id === q.correctOptionId)
+        const selectedOpt = q.options.find((o) => o.id === optionId)
+        const isCorrect = optionId === q.correctOptionId
+
+        if (isCorrect) state.score += POINTS_PER_CORRECT
+
+        const correctText = q.feedbackCorrect ?? (correctOpt?.text ?? "")
+        const selectedText = selectedOpt?.text ?? ""
+        if (!isCorrect) recordWrong(q, selectedText, correctText)
+
+        state.feedback = {
+          isCorrect,
+          selectedId: selectedOpt?.id ?? optionId,
+          correctId: q.correctOptionId,
+          correctText
+        }
+
+        render()
+      }
+
+      function next(){
+        state.feedback = null
+
+        if (state.questionIndex >= state.sessionQuestions.length - 1) {
+          state.screen = "result"
+          render()
+          return
+        }
+
+        state.questionIndex += 1
+        render()
+      }
+
+      app.addEventListener("click", (e) => {
+        const el = e.target instanceof Element ? e.target.closest("[data-action]") : null
+        if (!el) return
+
+        const action = el.getAttribute("data-action")
+        if (!action) return
+
+        if (action === "pick-level") {
+          const key = el.getAttribute("data-level")
+          if (!key) return
+          if (!levels[key]) return
+          if (levels[key].locked) {
+            showOverlay("locked")
+            return
+          }
+          state.levelKey = key
+          setBadge()
+          render()
+          return
+        }
+
+        if (action === "close-overlay") {
+          closeOverlay()
+          return
+        }
+
+        if (action === "start") {
+          startGame()
+          return
+        }
+
+        if (action === "reset") {
+          resetGame()
+          return
+        }
+
+        if (action === "restart") {
+          startGame()
+          return
+        }
+
+        if (action === "wrong-list") {
+          if (!state.wrongList.length) return
+          state.savedWrongList = [...state.wrongList]
+          state.screen = "wrongList"
+          render()
+          return
+        }
+
+        if (action === "back-result") {
+          state.screen = "result"
+          render()
+          return
+        }
+
+        if (action === "review-wrong") {
+          const base = state.savedWrongList.length ? state.savedWrongList : state.wrongList
+          if (!base.length) return
+          if (!state.savedWrongList.length) state.savedWrongList = [...state.wrongList]
+          startWrongReview()
+          return
+        }
+
+        if (action === "answer") {
+          if (state.feedback) return
+          const optionId = el.getAttribute("data-option-id")
+          if (!optionId) return
+          onAnswer(optionId)
+          return
+        }
+
+        if (action === "next") {
+          next()
+        }
+      })
+
+      setBrand()
+      setBadge()
+      render()
+    </script>
+  </body>
+</html>
