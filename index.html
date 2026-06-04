@@ -229,6 +229,91 @@
       const POINTS_PER_CORRECT = 10
       const SESSION_SIZE_TARGET = 100
 
+      const PROFILE_STORAGE_KEY = "nj_profile_v1"
+      const XP_LEVEL_THRESHOLDS = [0, 100, 250, 500, 800, 1200, 1700, 2300, 3000, 4000]
+
+      function defaultProfile(){
+        return { totalXp: 0, level: 1, streak: 0, lastActiveDate: null }
+      }
+
+      function currentDateKey(d){
+        const date = d instanceof Date ? d : new Date()
+        const y = date.getFullYear()
+        const m = String(date.getMonth() + 1).padStart(2, "0")
+        const day = String(date.getDate()).padStart(2, "0")
+        return `${y}-${m}-${day}`
+      }
+
+      function dateKeyOffset(days){
+        const d = new Date()
+        d.setDate(d.getDate() + days)
+        return currentDateKey(d)
+      }
+
+      function levelFromXp(totalXp){
+        const xp = Math.max(0, Number(totalXp) || 0)
+        let level = 1
+        for (let i = 0; i < XP_LEVEL_THRESHOLDS.length; i += 1) {
+          if (xp >= XP_LEVEL_THRESHOLDS[i]) level = i + 1
+        }
+        return Math.min(level, XP_LEVEL_THRESHOLDS.length)
+      }
+
+      function normalizeProfile(raw){
+        const base = defaultProfile()
+        if (!raw || typeof raw !== "object") return base
+        const totalXp = Math.max(0, Number(raw.totalXp) || 0)
+        const streak = Math.max(0, Number(raw.streak) || 0)
+        const lastActiveDate = typeof raw.lastActiveDate === "string" ? raw.lastActiveDate : null
+        const level = levelFromXp(totalXp)
+        return { totalXp, level, streak, lastActiveDate }
+      }
+
+      function loadProfile(){
+        try {
+          const raw = localStorage.getItem(PROFILE_STORAGE_KEY)
+          if (!raw) return defaultProfile()
+          return normalizeProfile(JSON.parse(raw))
+        } catch {
+          return defaultProfile()
+        }
+      }
+
+      function saveProfile(profile){
+        try {
+          localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile))
+        } catch {}
+      }
+
+      function profileMinXpForLevel(level){
+        const idx = Math.max(1, Math.min(XP_LEVEL_THRESHOLDS.length, Number(level) || 1)) - 1
+        return XP_LEVEL_THRESHOLDS[idx] ?? 0
+      }
+
+      function profileNextXpTarget(level){
+        const idx = Math.max(1, Math.min(XP_LEVEL_THRESHOLDS.length, Number(level) || 1)) - 1
+        const next = XP_LEVEL_THRESHOLDS[idx + 1]
+        return typeof next === "number" ? next : null
+      }
+
+      function markProfileActive(profile){
+        const today = currentDateKey(new Date())
+        if (profile.lastActiveDate === today) return false
+        const yesterday = dateKeyOffset(-1)
+        const wasYesterday = profile.lastActiveDate === yesterday
+        profile.streak = wasYesterday ? (Math.max(0, Number(profile.streak) || 0) + 1) : 1
+        profile.lastActiveDate = today
+        return true
+      }
+
+      function addXp(profile, delta){
+        const next = Math.max(0, (Number(profile.totalXp) || 0) + (Number(delta) || 0))
+        if (next == profile.totalXp) return false
+        profile.totalXp = next
+        profile.level = levelFromXp(next)
+        return true
+      }
+
 
       function initialsFromName(name){
         const cleaned = String(name || "").trim()
@@ -631,7 +716,8 @@
         feedback: null,
         wrongList: [],
         savedWrongList: [],
-        overlay: null
+        overlay: null,
+        profile: loadProfile()
       }
 
       function setBadge(){
@@ -682,6 +768,7 @@
       }
 
       function startWrongReview(){
+        if (markProfileActive(state.profile)) saveProfile(state.profile)
         state.mode = "reviewWrong"
         state.screen = "quiz"
         state.sessionQuestions = buildWrongReviewQuestions()
@@ -708,6 +795,7 @@
       }
 
       function startGame(){
+        if (markProfileActive(state.profile)) saveProfile(state.profile)
         state.screen = "quiz"
         state.mode = "normal"
         state.sessionQuestions = buildSessionQuestions()
@@ -742,6 +830,15 @@
       function renderStart(){
         const totalQuestions = SESSION_SIZE_TARGET
         const maxScore = totalQuestions * POINTS_PER_CORRECT
+
+        const xp = state.profile.totalXp
+        const lvl = state.profile.level
+        const streak = state.profile.streak
+        const minXp = profileMinXpForLevel(lvl)
+        const nextXp = profileNextXpTarget(lvl)
+        const pct = nextXp ? Math.round(((xp - minXp) / Math.max(1, nextXp - minXp)) * 100) : 100
+        const xpNeeded = nextXp ? Math.max(0, nextXp - xp) : 0
+        const xpLine = nextXp ? `XP <b>${xp}</b> • Butuh <b>${xpNeeded}</b> XP lagi ke Level <b>${lvl + 1}</b>` : `XP <b>${xp}</b> • Level <b>${lvl}</b> (MAX)`
 
         const cards = Object.entries(levels)
           .map(([key, lv]) => {
@@ -782,6 +879,16 @@
                 ${APP_TAGLINE}. Sesi <b>${totalQuestions}</b> soal. Benar: <b>+${POINTS_PER_CORRECT}</b> (maks. <b>${maxScore}</b>).<br/>
                 N5 dibuat lebih menantang dengan variasi vocab/partikel/bunpou/dokai yang lebih banyak.
               </div>
+            </div>
+
+            <div class="card">
+              <div class="row">
+                <div class="pill">🔥 Streak <span class="pill__muted">${streak}</span></div>
+                <div class="pill">⭐ Level <span class="pill__muted">${lvl}</span></div>
+              </div>
+              <div style="height:10px"></div>
+              <div class="progress" aria-hidden="true"><div class="progress__bar" style="width:${Math.max(0, Math.min(100, pct))}%"></div></div>
+              <div class="q__sub" style="margin-top:10px">${xpLine}</div>
             </div>
 
             <div class="card">
@@ -1036,12 +1143,16 @@
       }
 
       function onAnswer(optionId){
+        if (markProfileActive(state.profile)) saveProfile(state.profile)
         const q = currentQuestion()
         const correctOpt = q.options.find((o) => o.id === q.correctOptionId)
         const selectedOpt = q.options.find((o) => o.id === optionId)
         const isCorrect = optionId === q.correctOptionId
 
-        if (isCorrect) state.score += POINTS_PER_CORRECT
+        if (isCorrect) {
+          state.score += POINTS_PER_CORRECT
+          if (addXp(state.profile, POINTS_PER_CORRECT)) saveProfile(state.profile)
+        }
 
         const correctText = q.feedbackCorrect ?? (correctOpt?.text ?? "")
         const selectedText = selectedOpt?.text ?? ""
