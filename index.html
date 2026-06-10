@@ -721,6 +721,80 @@
         ]
       }
 
+      function n5RoadmapMilestones() {
+        return [
+          { title: "Hiragana & Katakana Mastery", icon: "あ", targetXp: 100 },
+          { title: "Core Vocabulary Foundation", icon: "📚", targetXp: 250 },
+          { title: "Basic Kanji + Reading Habit", icon: "字", targetXp: 500 },
+          { title: "Grammar Patterns & Particles", icon: "🧩", targetXp: 800 },
+          { title: "Listening Drills & Speed", icon: "🎧", targetXp: 1200 },
+          { title: "Full Mock Test Readiness", icon: "📝", targetXp: 1700 }
+        ]
+      }
+
+      function n5RoadmapSectionHtml() {
+        const xp = state.profile.totalXp
+        const milestones = n5RoadmapMilestones()
+        const finalTarget = milestones[milestones.length - 1]?.targetXp || 1
+        const overallPct = Math.max(0, Math.min(100, Math.round((xp / finalTarget) * 100)))
+        const completedCount = milestones.reduce((acc, item) => acc + (xp >= item.targetXp ? 1 : 0), 0)
+
+        const itemsHtml = milestones.map((item, index) => {
+          const prevTarget = index === 0 ? 0 : milestones[index - 1].targetXp
+          const isComplete = xp >= item.targetXp
+          const isCurrent = !isComplete && xp >= prevTarget
+          const pct = isComplete
+            ? 100
+            : xp <= prevTarget
+              ? 0
+              : Math.round(((xp - prevTarget) / Math.max(1, item.targetXp - prevTarget)) * 100)
+
+          const statusLabel = isComplete ? "Completed" : isCurrent ? "Current" : "Locked"
+          const statusClass = isComplete ? "status-pill--success" : isCurrent ? "status-pill--info" : "status-pill--warning"
+          const rowClass = isComplete ? "is-complete" : isCurrent ? "is-current" : "is-locked"
+          const segmentCurrent = Math.min(Math.max(0, xp - prevTarget), item.targetXp - prevTarget)
+
+          return `
+            <article class="roadmap-item ${rowClass}">
+              <div class="roadmap-marker" aria-hidden="true">
+                <div class="roadmap-marker__icon">${escapeHtml(item.icon)}</div>
+              </div>
+              <div class="roadmap-body">
+                <div class="roadmap-item__top">
+                  <div>
+                    <h3 class="roadmap-item__title">${escapeHtml(item.title)}</h3>
+                    <p class="roadmap-item__meta">Target ${formatNumber(item.targetXp)} XP</p>
+                  </div>
+                  <span class="status-pill ${statusClass}">${statusLabel}</span>
+                </div>
+                <div class="roadmap-item__progress">
+                  ${miniProgressHtml(pct)}
+                  <div class="roadmap-progress__meta">
+                    <span>${pct}%</span>
+                    <span>${formatNumber(segmentCurrent)} / ${formatNumber(item.targetXp - prevTarget)} XP</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          `
+        }).join("")
+
+        return `
+          <section class="surface-card">
+            <div class="surface-card__header">
+              <div>
+                <p class="section-caption">JLPT N5 Roadmap</p>
+                <h2 class="section-title">Roadmap belajar dari nol sampai siap ujian N5</h2>
+                <p class="section-note">Milestone membantu kamu melihat progres secara vertikal: selesai, sedang dikerjakan, dan yang masih terkunci.</p>
+              </div>
+              <span class="status-pill status-pill--info">${overallPct}%</span>
+            </div>
+            ${progressBarHtml(overallPct, `${completedCount}/${milestones.length} milestone`, `Target ${formatNumber(finalTarget)} XP`)}
+            <div class="roadmap">${itemsHtml}</div>
+          </section>
+        `
+      }
+
       function recordWrong(q, selectedText, correctText) {
         const existing = state.wrongList.find((item) => item.qId === q.id)
         if (!existing) {
@@ -798,6 +872,14 @@
               <span>${labelStart}</span>
               <span>${labelEnd}</span>
             </div>
+          </div>
+        `
+      }
+
+      function miniProgressHtml(percent) {
+        return `
+          <div class="roadmap-progress" aria-hidden="true">
+            <div class="roadmap-progress__fill" style="width:${Math.max(0, Math.min(100, percent))}%"></div>
           </div>
         `
       }
@@ -955,6 +1037,9 @@
             ${metricCardHtml("Best Accuracy", `${formatNumber(state.profile.bestAccuracy)}%`, "Skor terbaik dipakai untuk memotivasi peningkatan performa berikutnya.")}
             ${metricCardHtml("Sessions Played", formatNumber(state.profile.sessionsPlayed), "Jumlah sesi lengkap yang sudah kamu selesaikan.")}
           </section>
+
+          ${n5RoadmapSectionHtml()}
+
 
           <section class="surface-card">
             <div class="surface-card__header">
