@@ -50,6 +50,7 @@
       const POINTS_PER_CORRECT = 10
       const SESSION_SIZE_TARGET = 100
       const PROFILE_STORAGE_KEY = "nj_profile_v2"
+      const PROGRESS_STORAGE_KEY = "nj_progress_v1"
       const XP_LEVEL_THRESHOLDS = [0, 100, 250, 500, 800, 1200, 1700, 2300, 3000, 4000]
       const VOCAB_PREVIEW_LIMIT = 12
 
@@ -171,6 +172,78 @@
         try {
           localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile))
         } catch {}
+      }
+
+      function defaultProgressState() {
+        return { version: 1, profile: defaultProfile(), roadmapCompleted: {}, vocabProgress: {} }
+      }
+
+      function normalizeRoadmapCompleted(raw) {
+        if (!raw || typeof raw !== "object") return {}
+        const out = {}
+        for (const [levelKey, levelMap] of Object.entries(raw)) {
+          if (!levelMap || typeof levelMap !== "object") continue
+          const inner = {}
+          for (const [id, value] of Object.entries(levelMap)) {
+            if (value) inner[String(id)] = true
+          }
+          if (Object.keys(inner).length) out[String(levelKey)] = inner
+        }
+        return out
+      }
+
+      function normalizeVocabProgress(raw) {
+        if (!raw || typeof raw !== "object") return {}
+        const out = {}
+        for (const [key, value] of Object.entries(raw)) {
+          if (!value || typeof value !== "object") continue
+          const seen = Math.max(0, Number(value.seen) || 0)
+          const correct = Math.max(0, Number(value.correct) || 0)
+          const wrong = Math.max(0, Number(value.wrong) || 0)
+          const mastered = Boolean(value.mastered) || correct >= 3
+          const lastSeenDate = typeof value.lastSeenDate === "string" ? value.lastSeenDate : null
+          out[String(key)] = { seen, correct, wrong, mastered, lastSeenDate }
+        }
+        return out
+      }
+
+      function normalizeProgressState(raw) {
+        const base = defaultProgressState()
+        if (!raw || typeof raw !== "object") return base
+        return {
+          version: 1,
+          profile: normalizeProfile(raw.profile),
+          roadmapCompleted: normalizeRoadmapCompleted(raw.roadmapCompleted),
+          vocabProgress: normalizeVocabProgress(raw.vocabProgress)
+        }
+      }
+
+      function saveProgressState(progress) {
+        try {
+          localStorage.setItem(
+            PROGRESS_STORAGE_KEY,
+            JSON.stringify({
+              version: 1,
+              profile: progress.profile,
+              roadmapCompleted: progress.roadmapCompleted,
+              vocabProgress: progress.vocabProgress
+            })
+          )
+        } catch {}
+        saveProfile(progress.profile)
+      }
+
+      function loadProgressState() {
+        try {
+          const raw = localStorage.getItem(PROGRESS_STORAGE_KEY)
+          if (raw) return normalizeProgressState(JSON.parse(raw))
+        } catch {}
+
+        const legacyProfile = loadProfile()
+        const migrated = defaultProgressState()
+        migrated.profile = legacyProfile
+        saveProgressState(migrated)
+        return migrated
       }
 
       function profileMinXpForLevel(level) {
@@ -750,6 +823,7 @@
           id: `${levelKey}-reading-${String(index + 1).padStart(4, "0")}`,
           type: "reading",
           typeLabel: "よみかた / Bacaan",
+          vocabRef: { levelKey, index: itemIndex },
           prompt: { primary: item.kanji, secondary: "Pilih bacaan hiragana yang benar" },
           questionText: `「${item.kanji}」の よみかたは どれですか。`,
           questionSub: "Pilih hiragana yang benar untuk kanji di atas.",
@@ -772,6 +846,7 @@
           id: `${levelKey}-kanji-${String(index + 1).padStart(4, "0")}`,
           type: "kanji",
           typeLabel: "かんじ / Kanji",
+          vocabRef: { levelKey, index: itemIndex },
           prompt: { primary: item.kana, secondary: "Pilih bentuk kanji yang benar" },
           questionText: `「${item.kana}」を かんじで かくと どれですか。`,
           questionSub: "Cari bentuk kanji yang sesuai dengan bacaan di atas.",
@@ -863,6 +938,7 @@
       const sidebar = document.getElementById("sidebar")
       const bottomNav = document.getElementById("bottomNav")
 
+      const initialProgress = loadProgressState()
       const state = {
         screen: "home",
         levelKey: "n5",
@@ -874,7 +950,54 @@
         wrongList: [],
         savedWrongList: [],
         lastResult: null,
-        profile: loadProfile()
+        profile: initialProgress.profile,
+        roadmapCompleted: initialProgress.roadmapCompleted,
+        vocabProgress: initialProgress.vocabProgress
+      }
+
+      function persistProgress() {
+        saveProgressState({
+          profile: state.profile,
+          roadmapCompleted: state.roadmapCompleted,
+          vocabProgress: state.vocabProgress
+        })
+      }
+
+      function syncN5RoadmapCompletionFromXp() {
+        const milestones = n5RoadmapMilestones()
+        const xp = state.profile.totalXp
+        const levelKey = "n5"
+        if (!state.roadmapCompleted || typeof state.roadmapCompleted !== "object") state.roadmapCompleted = {}
+        if (!state.roadmapCompleted[levelKey] || typeof state.roadmapCompleted[levelKey] !== "object") {
+          state.roadmapCompleted[levelKey] = {}
+        }
+        const map = state.roadmapCompleted[levelKey]
+        let changed = false
+        for (let i = 0; i < milestones.length; i += 1) {
+          if (xp >= milestones[i].targetXp && !map[String(i)]) {
+            map[String(i)] = true
+            changed = true
+          }
+        }
+        return changed
+      }
+
+      function trackVocabProgressFromAnswer(q, isCorrect) {
+        const ref = q?.vocabRef
+        if (!ref) return false
+        const key = `${ref.levelKey}:${ref.index}`
+        const existing = state.vocabProgress?.[key]
+        const next = existing && typeof existing === "object"
+          ? { ...existing }
+          : { seen: 0, correct: 0, wrong: 0, mastered: false, lastSeenDate: null }
+        next.seen = Math.max(0, Number(next.seen) || 0) + 1
+        if (isCorrect) next.correct = Math.max(0, Number(next.correct) || 0) + 1
+        else next.wrong = Math.max(0, Number(next.wrong) || 0) + 1
+        next.mastered = Boolean(next.mastered) || (next.correct >= 3)
+        next.lastSeenDate = currentDateKey(new Date())
+        if (!state.vocabProgress || typeof state.vocabProgress !== "object") state.vocabProgress = {}
+        state.vocabProgress[key] = next
+        return true
       }
 
       function currentQuestion() {
@@ -973,13 +1096,14 @@
       function n5RoadmapSectionHtml() {
         const xp = state.profile.totalXp
         const milestones = n5RoadmapMilestones()
+        const persistedCompleted = state.roadmapCompleted?.n5 || {}
         const finalTarget = milestones[milestones.length - 1]?.targetXp || 1
         const overallPct = Math.max(0, Math.min(100, Math.round((xp / finalTarget) * 100)))
-        const completedCount = milestones.reduce((acc, item) => acc + (xp >= item.targetXp ? 1 : 0), 0)
+        const completedCount = milestones.reduce((acc, item, index) => acc + ((xp >= item.targetXp || persistedCompleted[String(index)]) ? 1 : 0), 0)
 
         const itemsHtml = milestones.map((item, index) => {
           const prevTarget = index === 0 ? 0 : milestones[index - 1].targetXp
-          const isComplete = xp >= item.targetXp
+          const isComplete = xp >= item.targetXp || persistedCompleted[String(index)]
           const isCurrent = !isComplete && xp >= prevTarget
           const pct = isComplete
             ? 100
@@ -1311,15 +1435,36 @@
       function renderVocabulary() {
         const activeLevel = currentLevel()
         const stats = levelStats(activeLevel)
+        const vocabTotal = activeLevel.vocab.length
+        let masteredCount = 0
+        let seenCount = 0
+        for (let i = 0; i < vocabTotal; i += 1) {
+          const key = `${state.levelKey}:${i}`
+          const entry = state.vocabProgress?.[key]
+          if (!entry || typeof entry !== "object") continue
+          if ((entry.seen ?? 0) > 0) seenCount += 1
+          if (entry.mastered) masteredCount += 1
+        }
+
         const vocabCards = activeLevel.vocab.slice(0, VOCAB_PREVIEW_LIMIT)
-          .map((item, index) => `
-            <article class="vocab-card">
-              <span class="badge vocab-card__badge">#${index + 1}</span>
-              <h3 class="vocab-card__kanji">${item.kanji}</h3>
-              <p class="vocab-card__kana">${item.kana}</p>
-              <p class="vocab-card__desc">Flashcard singkat untuk review cepat sebelum masuk ke sesi quiz.</p>
-            </article>
-          `)
+          .map((item, index) => {
+            const key = `${state.levelKey}:${index}`
+            const entry = state.vocabProgress?.[key]
+            const isSeen = (entry?.seen ?? 0) > 0
+            const statusLabel = entry?.mastered ? "Mastered" : isSeen ? "Learning" : "New"
+            const statusClass = entry?.mastered ? "status-pill--success" : isSeen ? "status-pill--info" : "status-pill--warning"
+            return `
+              <article class="vocab-card">
+                <div class="vocab-card__top">
+                  <span class="badge vocab-card__badge">#${index + 1}</span>
+                  <span class="status-pill ${statusClass}">${statusLabel}</span>
+                </div>
+                <h3 class="vocab-card__kanji">${item.kanji}</h3>
+                <p class="vocab-card__kana">${item.kana}</p>
+                <p class="vocab-card__desc">Flashcard singkat untuk review cepat sebelum masuk ke sesi quiz.</p>
+              </article>
+            `
+          })
           .join("")
 
         app.innerHTML = `
@@ -1340,6 +1485,8 @@
             </div>
             <div class="kpi-grid">
               ${metricCardHtml("Vocabulary", formatNumber(stats.vocabCount), "Koleksi kata utama untuk level aktif.")}
+              ${metricCardHtml("Vocab Mastered", `${formatNumber(masteredCount)}/${formatNumber(vocabTotal)}`, "Kata yang sudah kamu jawab benar beberapa kali di quiz.")}
+              ${metricCardHtml("Vocab Seen", `${formatNumber(seenCount)}/${formatNumber(vocabTotal)}`, "Kata yang sudah pernah muncul di quiz (benar atau salah).")}
               ${metricCardHtml("Particle Bank", formatNumber(stats.particleCount), "Bank latihan partikel untuk memperkuat konteks kalimat.")}
               ${metricCardHtml("Pattern Bank", formatNumber(stats.patternCount), "Pola bunpou yang bisa diulang berkali-kali.")}
               ${metricCardHtml("Dokai", formatNumber(stats.storyCount), "Latihan reading comprehension singkat untuk membangun endurance.")}
@@ -1761,7 +1908,7 @@
         const result = getResultMetrics()
         state.lastResult = result
         registerSession(state.profile, result.accuracy)
-        saveProfile(state.profile)
+        persistProgress()
       }
 
       function resetGame() {
@@ -1779,7 +1926,8 @@
 
       function startGame() {
         markProfileActive(state.profile)
-        saveProfile(state.profile)
+        syncN5RoadmapCompletionFromXp()
+        persistProgress()
         state.screen = "quiz"
         state.mode = "normal"
         state.sessionQuestions = buildSessionQuestions()
@@ -1800,7 +1948,8 @@
           return
         }
         markProfileActive(state.profile)
-        saveProfile(state.profile)
+        syncN5RoadmapCompletionFromXp()
+        persistProgress()
         state.mode = "reviewWrong"
         state.screen = "quiz"
         state.sessionQuestions = buildWrongReviewQuestions()
@@ -1824,19 +1973,26 @@
       function onAnswer(optionId) {
         const q = currentQuestion()
         if (!q) return
-        markProfileActive(state.profile)
+        const streakChanged = markProfileActive(state.profile)
 
         const correctOpt = q.options.find((o) => o.id === q.correctOptionId)
         const selectedOpt = q.options.find((o) => o.id === optionId)
         const isCorrect = optionId === q.correctOptionId
         const correctText = q.feedbackCorrect ?? correctOpt?.text ?? ""
 
+        const vocabChanged = trackVocabProgressFromAnswer(q, isCorrect)
+        let shouldPersist = streakChanged || vocabChanged
+
         if (isCorrect) {
           state.score += POINTS_PER_CORRECT
-          addXp(state.profile, POINTS_PER_CORRECT)
-          saveProfile(state.profile)
+          const xpChanged = addXp(state.profile, POINTS_PER_CORRECT)
+          if (xpChanged) {
+            syncN5RoadmapCompletionFromXp()
+            shouldPersist = true
+          }
         } else {
           recordWrong(q, selectedOpt?.text ?? "", correctText)
+          shouldPersist = true
         }
 
         state.feedback = {
@@ -1847,6 +2003,7 @@
           explanation: buildAnswerExplanation(q, correctText)
         }
 
+        if (shouldPersist) persistProgress()
         render()
       }
 
@@ -1944,6 +2101,7 @@
       bindActionRoot(screenBanner)
 
       setBrand()
+      if (syncN5RoadmapCompletionFromXp()) persistProgress()
       render()
     </script>
   </body>

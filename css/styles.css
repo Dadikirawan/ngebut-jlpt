@@ -760,6 +760,13 @@ button {
   width: fit-content;
 }
 
+.vocab-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
 .question-shell {
   display: grid;
   gap: 16px;
