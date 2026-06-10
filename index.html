@@ -3,240 +3,118 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#541b4c" />
     <title>Ngebut JLPT</title>
-    <style>
-      :root{
-        --bg0:#fff7fb;
-        --bg1:#f3f7ff;
-        --ink:#181a2a;
-        --muted:rgba(24,26,42,.72);
-        --muted2:rgba(24,26,42,.58);
-        --a:#5aa7ff;
-        --b:#2fd2b0;
-        --c:#ffbf5a;
-        --bad:#ff4f8f;
-        --good:#2fd2b0;
-        --gap:14px;
-        --shadow:0 18px 45px rgba(17,20,34,.14);
-      }
-
-      *{box-sizing:border-box}
-      html,body{height:100%}
-      body{
-        margin:0;
-        color:var(--ink);
-        background:
-          radial-gradient(1200px 600px at 20% 0%, rgba(90,167,255,.20), transparent 60%),
-          radial-gradient(1000px 700px at 90% 20%, rgba(47,210,176,.18), transparent 55%),
-          radial-gradient(900px 700px at 60% 110%, rgba(255,191,90,.18), transparent 55%),
-          linear-gradient(180deg, var(--bg0), var(--bg1));
-        font-family: ui-sans-serif, -apple-system, system-ui, "Avenir Next", "Avenir", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Segoe UI", sans-serif;
-        letter-spacing:.1px;
-        -webkit-text-size-adjust:100%;
-        text-size-adjust:100%;
-      }
-
-      body::before{
-        content:"";
-        position:fixed;
-        inset:-220px;
-        background:conic-gradient(from 210deg at 50% 50%, rgba(90,167,255,.20), rgba(47,210,176,.18), rgba(255,191,90,.16), rgba(255,79,143,.14), rgba(90,167,255,.20));
-        filter:blur(70px);
-        opacity:.55;
-        animation:drift 12s ease-in-out infinite alternate;
-        pointer-events:none;
-        z-index:-1;
-      }
-
-      @keyframes drift{from{transform:translate3d(-2%, -1%, 0) rotate(-6deg)}to{transform:translate3d(2%, 1%, 0) rotate(6deg)}}
-
-      .shell{min-height:100%;display:grid;place-items:center;padding:clamp(12px, 3vw, 22px);padding-bottom:calc(clamp(12px, 3vw, 22px) + env(safe-area-inset-bottom));}
-
-      .frame{
-        width:min(980px, 100%);
-        background:linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.76));
-        border:1px solid rgba(24,26,42,.10);
-        border-radius:26px;
-        box-shadow:var(--shadow);
-        padding:clamp(12px, 2.4vw, 18px);
-        backdrop-filter: blur(10px);
-      }
-
-      .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 8px 16px 8px;}
-      .brand{display:flex;align-items:center;gap:12px;}
-      .brand__mark{
-        width:44px;height:44px;display:grid;place-items:center;border-radius:14px;
-        border:1px solid rgba(24,26,42,.14);
-        background:linear-gradient(180deg, rgba(90,167,255,.18), rgba(255,255,255,.70));
-        color:rgba(24,26,42,.92);
-        font-weight:950;
-        letter-spacing:.6px;
-      }
-      .brand__title{font-weight:900;font-size:18px;}
-      .brand__subtitle{color:var(--muted2);font-size:12px;margin-top:2px;line-height:1.25;}
-
-      .badge{
-        font-weight:900;border:1px solid rgba(24,26,42,.14);border-radius:999px;padding:10px 14px;
-        background:linear-gradient(180deg, rgba(255,191,90,.30), rgba(255,255,255,.72));
-        color:rgba(24,26,42,.92);
-      }
-
-      .stage{
-        border-radius:22px;border:1px solid rgba(24,26,42,.10);
-        background:linear-gradient(180deg, rgba(255,255,255,.60), rgba(255,255,255,.42));
-        padding:clamp(14px, 2.4vw, 18px);
-        min-height:min(560px, calc(100vh - 190px));
-        position:relative;
-        overflow:auto;
-      }
-
-      .foot{padding:14px 8px 6px 8px;text-align:center;color:var(--muted2);font-size:12px;}
-
-      .panel{max-width:780px;margin:0 auto;display:grid;gap:var(--gap);}
-      .hero{text-align:center;padding:18px 10px;display:grid;gap:12px;}
-      .hero__h{font-size:clamp(26px, 4.6vw, 34px);font-weight:950;letter-spacing:.2px;}
-      .hero__p{color:var(--muted);font-size:clamp(14px, 2.6vw, 16px);line-height:1.5;}
-
-      .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
-
-      .pill{display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(24,26,42,.12);background:rgba(255,255,255,.60);padding:10px 12px;border-radius:999px;font-weight:900;color:rgba(24,26,42,.92);}
-      .pill__muted{color:var(--muted);font-weight:900;}
-
-      .pill--type{border-color:rgba(24,26,42,.12);background:linear-gradient(180deg, rgba(90,167,255,.14), rgba(255,255,255,.62));}
-
-      .card{border:1px solid rgba(24,26,42,.12);border-radius:22px;padding:16px;background:linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.56));}
-
-      .grid{display:grid;grid-template-columns: 1fr;gap:12px;}
-
-      .level{border:1px solid rgba(24,26,42,.12);border-radius:22px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.56));display:grid;gap:10px;}
-      .level__top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
-      .level__name{font-weight:950;font-size:18px;}
-      .level__desc{color:var(--muted2);font-weight:800;font-size:12px;line-height:1.35;margin-top:4px;}
-      .level__meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
-      .level__lock{color:rgba(24,26,42,.88);font-weight:950;}
-
-      .tag{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid rgba(24,26,42,.12);background:rgba(255,255,255,.66);font-weight:900;color:rgba(24,26,42,.92);font-size:12px;}
-
-      .prompt{display:grid;place-items:center;padding:18px 14px;background:linear-gradient(180deg, rgba(90,167,255,.16), rgba(255,255,255,.62));border-radius:20px;border:1px dashed rgba(24,26,42,.18);}
-      .prompt__primary{font-size:clamp(30px, 7vw, 42px);font-weight:950;letter-spacing:.4px;line-height:1.15;text-align:center;}
-      .prompt__secondary{color:var(--muted);font-weight:900;font-size:14px;margin-top:10px;text-align:center;}
-
-      .q{font-size:18px;font-weight:900;line-height:1.4;}
-      .q__sub{margin-top:8px;color:var(--muted2);font-size:13px;font-weight:800;line-height:1.35;}
-
-      .answers{display:grid;grid-template-columns:1fr;gap:12px;}
-
-      .btn{appearance:none;border:1px solid rgba(24,26,42,.14);background:linear-gradient(180deg, rgba(255,255,255,.70), rgba(255,255,255,.56));border-radius:20px;padding:14px 14px;text-align:left;cursor:pointer;transition: transform .08s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;color:rgba(24,26,42,.92);font-family:inherit;}
-      .btn:hover{transform:translateY(-2px);border-color:rgba(24,26,42,.26);box-shadow:0 18px 40px rgba(17,20,34,.18);}
-      .btn:active{transform:translateY(1px);}
-      .btn:focus-visible{outline:4px solid rgba(90,167,255,.35);outline-offset:2px;}
-      .btn[disabled]{cursor:not-allowed;opacity:.75;transform:none;box-shadow:none;}
-
-      .btn__top{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-      .btn__label{font-weight:950;font-size:clamp(16px, 2.6vw, 18px);}
-      .btn__tag{font-weight:950;width:34px;height:34px;display:grid;place-items:center;border-radius:12px;border:1px solid rgba(24,26,42,.14);background:rgba(255,255,255,.66);color:rgba(24,26,42,.92);}
-
-      .btn--a{border-color:rgba(90,167,255,.42);} .btn--b{border-color:rgba(47,210,176,.42);} .btn--c{border-color:rgba(255,191,90,.42);} 
-      .btn--right{border-color:rgba(47,210,176,.72);background:linear-gradient(180deg, rgba(47,210,176,.16), rgba(255,255,255,.56));}
-      .btn--wrong{border-color:rgba(255,79,143,.72);background:linear-gradient(180deg, rgba(255,79,143,.12), rgba(255,255,255,.56));animation:shake .18s ease 2;}
-
-      @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}100%{transform:translateX(0)}}
-
-      .feedback{border-radius:20px;border:1px solid rgba(24,26,42,.12);background:rgba(255,255,255,.70);padding:14px;display:grid;gap:10px;}
-      .feedback__h{font-size:18px;font-weight:950;}
-      .feedback__p{color:var(--muted);font-weight:850;line-height:1.4;}
-
-      .cta{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:6px;}
-      .cta .btn{min-width:min(240px, 100%);width:min(340px, 100%);text-align:center;}
-
-      .small{background:rgba(255,255,255,.66);border:1px solid rgba(24,26,42,.12);border-radius:16px;padding:10px 12px;font-weight:900;cursor:pointer;color:rgba(24,26,42,.92);font-family:inherit;transition: transform .08s ease, border-color .18s ease;}
-      .small:hover{transform:translateY(-1px);border-color:rgba(24,26,42,.24);} .small:active{transform:translateY(1px);}
-
-      .progress{height:10px;border-radius:999px;border:1px solid rgba(24,26,42,.12);background:rgba(255,255,255,.56);overflow:hidden;}
-      .progress__bar{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg, rgba(90,167,255,.95), rgba(47,210,176,.95), rgba(255,191,90,.92));box-shadow:0 14px 30px rgba(17,20,34,.12);transition: width .22s ease;}
-
-      .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:18px;background:rgba(250,245,255,.62);border-radius:22px;}
-      .overlay__card{width:min(720px, 100%);border:1px solid rgba(24,26,42,.14);border-radius:24px;padding:16px;background:linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.70));box-shadow:0 30px 70px rgba(17,20,34,.16);}
-
-      .nb-card{border:2px solid rgba(24,26,42,.82);background:rgba(255,255,255,.70);box-shadow:10px 10px 0 rgba(24,26,42,.18);border-radius:18px;padding:16px;}
-      .resultGrid{display:grid;grid-template-columns:1fr;gap:12px;}
-      .resultHero{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-      .scoreBig{font-weight:950;font-size:44px;letter-spacing:.2px;}
-      .scoreSub{color:var(--muted);font-weight:850;}
-      .ring{width:132px;height:132px;border-radius:999px;display:grid;place-items:center;border:2px solid rgba(24,26,42,.82);box-shadow:10px 10px 0 rgba(24,26,42,.18);background:rgba(255,255,255,.70);}
-      .ring__inner{width:96px;height:96px;border-radius:999px;border:2px solid rgba(24,26,42,.82);background:rgba(255,255,255,.66);display:grid;place-items:center;}
-      .ring__pct{font-weight:950;font-size:22px;}
-      .stats{display:grid;grid-template-columns:1fr;gap:12px;}
-      .statKey{color:var(--muted2);font-weight:900;font-size:12px;letter-spacing:.6px;text-transform:uppercase;}
-      .statVal{font-weight:950;font-size:20px;margin-top:6px;}
-
-      @media (max-width: 420px){
-        .shell{padding:0;padding-bottom:env(safe-area-inset-bottom);}
-        .frame{border-radius:0;border:0;box-shadow:none;padding:12px;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;}
-        .top{padding:8px 10px 10px 10px;gap:10px;}
-        .brand__mark{width:38px;height:38px;border-radius:12px;}
-        .brand__title{font-size:16px;}
-        .brand__subtitle{font-size:11px;}
-        .badge{padding:8px 12px;}
-        .stage{padding:12px;min-height:0;flex:1;overflow:auto;border-radius:18px;}
-        .foot{padding:10px 12px 14px 12px;}
-        .cta .btn{width:100%;min-width:0;}
-      }
-
-      @supports (height: 100svh){
-        .stage{min-height:min(560px, calc(100svh - 190px));}
-      }
-
-      @media (min-width: 560px){
-        .answers{grid-template-columns:1fr 1fr;}
-      }
-
-      @media (min-width: 760px){
-        .answers{grid-template-columns:1fr 1fr 1fr;}
-        .grid{grid-template-columns: 1fr 1fr 1fr;}
-        .resultGrid{grid-template-columns:1fr 1fr;align-items:stretch;}
-        .stats{grid-template-columns:1fr 1fr;}
-      }
-
-      @media (min-width: 980px){
-        .resultGrid{grid-template-columns:1.1fr .9fr;}
-      }
-    </style>
+    <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <div class="frame">
-        <header class="top">
+    <div class="app-bg" aria-hidden="true">
+      <div class="app-bg__orb app-bg__orb--primary"></div>
+      <div class="app-bg__orb app-bg__orb--secondary"></div>
+      <div class="app-bg__orb app-bg__orb--accent"></div>
+      <div class="app-bg__grid"></div>
+    </div>
+
+    <main class="app-shell">
+      <div class="app-frame">
+        <header class="app-topbar">
           <div class="brand">
-            <div class="brand__mark" id="brandMark" aria-hidden="true">NJ</div>
-            <div class="brand__text">
+            <div class="brand__mark" id="brandMark">NJ</div>
+            <div>
               <div class="brand__title" id="brandTitle">Ngebut JLPT</div>
-              <div class="brand__subtitle" id="brandSubtitle">Main 10 menit sehari • skor naik, level naik</div>
+              <div class="brand__subtitle" id="brandSubtitle">Belajar lebih fokus, progres lebih terasa</div>
             </div>
           </div>
-          <div class="badge" id="levelBadge">N5</div>
+          <div class="topbar-actions" id="topbarActions"></div>
         </header>
 
-        <section class="stage" id="app" aria-live="polite"></section>
+        <div class="app-layout">
+          <aside class="app-sidebar" id="sidebar"></aside>
 
-        <footer class="foot">Latihan cepat: baca → pilih → feedback → ulangi. Ada Daftar salah untuk review.</footer>
+          <section class="app-stage">
+            <section class="screen-banner" id="screenBanner" aria-live="polite"></section>
+            <section class="screen-view" id="app" aria-live="polite"></section>
+            <nav class="bottom-nav" id="bottomNav" aria-label="Navigasi utama"></nav>
+          </section>
+        </div>
+
+        <footer class="app-footer">
+          Premium learning flow: dashboard, vocabulary, quiz, result, dan progress tracker dalam satu pengalaman belajar yang konsisten.
+        </footer>
       </div>
     </main>
 
     <script>
       const APP_NAME = "Ngebut JLPT"
-      const APP_TAGLINE = "Main 10 menit sehari • skor naik, level naik"
+      const APP_TAGLINE = "Belajar JLPT terasa modern, fokus, dan bikin ketagihan"
       const POINTS_PER_CORRECT = 10
       const SESSION_SIZE_TARGET = 100
-
-      const PROFILE_STORAGE_KEY = "nj_profile_v1"
+      const PROFILE_STORAGE_KEY = "nj_profile_v2"
       const XP_LEVEL_THRESHOLDS = [0, 100, 250, 500, 800, 1200, 1700, 2300, 3000, 4000]
+      const VOCAB_PREVIEW_LIMIT = 12
 
-      function defaultProfile(){
-        return { totalXp: 0, level: 1, streak: 0, lastActiveDate: null }
+      const screenMeta = {
+        home: {
+          eyebrow: "Home Dashboard",
+          title: "Belajar lebih rapi, premium, dan bikin fokus.",
+          description: "Pilih level, lihat target XP, dan mulai sesi yang terasa seperti produk edukasi modern dengan alur belajar yang jelas.",
+          actions: [
+            { label: "Mulai Sesi", action: "start", variant: "primary" },
+            { label: "Lihat Vocabulary", action: "navigate", screen: "vocabulary", variant: "secondary" }
+          ]
+        },
+        vocabulary: {
+          eyebrow: "Vocabulary Library",
+          title: "Kartu kosakata yang nyaman dipelajari di mobile.",
+          description: "Tiap kata disusun dalam kartu ringkas dengan hiragana, kanji, dan konteks level supaya review terasa ringan dan cepat.",
+          actions: [
+            { label: "Mulai Quiz", action: "start", variant: "primary" },
+            { label: "Lihat Progress", action: "navigate", screen: "progress", variant: "ghost" }
+          ]
+        },
+        quiz: {
+          eyebrow: "Quiz Session",
+          title: "Latihan aktif dengan fokus ke akurasi dan ritme belajar.",
+          description: "Komponen jawaban, progress bar, dan feedback disusun untuk menjaga fokus belajar tanpa distraksi.",
+          actions: [
+            { label: "Ulangi Sesi", action: "restart", variant: "secondary" },
+            { label: "Kembali Home", action: "reset", variant: "ghost" }
+          ]
+        },
+        result: {
+          eyebrow: "Results Screen",
+          title: "Hasil belajar yang terasa rewarding dan informatif.",
+          description: "Skor, akurasi, XP, dan achievements dirangkum dalam satu layar supaya pengguna langsung tahu langkah berikutnya.",
+          actions: [
+            { label: "Main Lagi", action: "start", variant: "primary" },
+            { label: "Progress Dashboard", action: "navigate", screen: "progress", variant: "secondary" }
+          ]
+        },
+        wrongList: {
+          eyebrow: "Review Mode",
+          title: "Review jawaban salah supaya improvement lebih terasa.",
+          description: "Semua kesalahan penting dikumpulkan rapi untuk dijadikan latihan ulang dan refleksi singkat.",
+          actions: [
+            { label: "Ulangi Yang Salah", action: "review-wrong", variant: "primary" },
+            { label: "Kembali Hasil", action: "back-result", variant: "ghost" }
+          ]
+        },
+        progress: {
+          eyebrow: "Progress Dashboard",
+          title: "Visualisasi XP, streak, dan growth path yang lebih premium.",
+          description: "Ringkasan progres dibuat seperti SaaS dashboard agar perkembangan belajar mudah dibaca dalam beberapa detik.",
+          actions: [
+            { label: "Mulai Sesi Baru", action: "start", variant: "primary" },
+            { label: "Buka Vocabulary", action: "navigate", screen: "vocabulary", variant: "ghost" }
+          ]
+        }
       }
 
-      function currentDateKey(d){
+      function defaultProfile() {
+        return { totalXp: 0, level: 1, streak: 0, lastActiveDate: null, sessionsPlayed: 0, bestAccuracy: 0 }
+      }
+
+      function currentDateKey(d) {
         const date = d instanceof Date ? d : new Date()
         const y = date.getFullYear()
         const m = String(date.getMonth() + 1).padStart(2, "0")
@@ -244,13 +122,13 @@
         return `${y}-${m}-${day}`
       }
 
-      function dateKeyOffset(days){
+      function dateKeyOffset(days) {
         const d = new Date()
         d.setDate(d.getDate() + days)
         return currentDateKey(d)
       }
 
-      function levelFromXp(totalXp){
+      function levelFromXp(totalXp) {
         const xp = Math.max(0, Number(totalXp) || 0)
         let level = 1
         for (let i = 0; i < XP_LEVEL_THRESHOLDS.length; i += 1) {
@@ -259,17 +137,27 @@
         return Math.min(level, XP_LEVEL_THRESHOLDS.length)
       }
 
-      function normalizeProfile(raw){
+      function normalizeProfile(raw) {
         const base = defaultProfile()
         if (!raw || typeof raw !== "object") return base
+
         const totalXp = Math.max(0, Number(raw.totalXp) || 0)
         const streak = Math.max(0, Number(raw.streak) || 0)
+        const sessionsPlayed = Math.max(0, Number(raw.sessionsPlayed) || 0)
+        const bestAccuracy = Math.max(0, Math.min(100, Number(raw.bestAccuracy) || 0))
         const lastActiveDate = typeof raw.lastActiveDate === "string" ? raw.lastActiveDate : null
-        const level = levelFromXp(totalXp)
-        return { totalXp, level, streak, lastActiveDate }
+
+        return {
+          totalXp,
+          level: levelFromXp(totalXp),
+          streak,
+          lastActiveDate,
+          sessionsPlayed,
+          bestAccuracy
+        }
       }
 
-      function loadProfile(){
+      function loadProfile() {
         try {
           const raw = localStorage.getItem(PROFILE_STORAGE_KEY)
           if (!raw) return defaultProfile()
@@ -279,24 +167,24 @@
         }
       }
 
-      function saveProfile(profile){
+      function saveProfile(profile) {
         try {
           localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile))
         } catch {}
       }
 
-      function profileMinXpForLevel(level){
+      function profileMinXpForLevel(level) {
         const idx = Math.max(1, Math.min(XP_LEVEL_THRESHOLDS.length, Number(level) || 1)) - 1
         return XP_LEVEL_THRESHOLDS[idx] ?? 0
       }
 
-      function profileNextXpTarget(level){
+      function profileNextXpTarget(level) {
         const idx = Math.max(1, Math.min(XP_LEVEL_THRESHOLDS.length, Number(level) || 1)) - 1
         const next = XP_LEVEL_THRESHOLDS[idx + 1]
         return typeof next === "number" ? next : null
       }
 
-      function markProfileActive(profile){
+      function markProfileActive(profile) {
         const today = currentDateKey(new Date())
         if (profile.lastActiveDate === today) return false
         const yesterday = dateKeyOffset(-1)
@@ -306,34 +194,41 @@
         return true
       }
 
-      function addXp(profile, delta){
+      function addXp(profile, delta) {
         const next = Math.max(0, (Number(profile.totalXp) || 0) + (Number(delta) || 0))
-        if (next == profile.totalXp) return false
+        if (next === profile.totalXp) return false
         profile.totalXp = next
         profile.level = levelFromXp(next)
         return true
       }
 
+      function registerSession(profile, accuracy) {
+        profile.sessionsPlayed = Math.max(0, Number(profile.sessionsPlayed) || 0) + 1
+        profile.bestAccuracy = Math.max(profile.bestAccuracy || 0, Number(accuracy) || 0)
+      }
 
-      function initialsFromName(name){
+      function initialsFromName(name) {
         const cleaned = String(name || "").trim()
-        if (!cleaned) return "JP"
+        if (!cleaned) return "NJ"
         const parts = cleaned.split(/\s+/g).filter(Boolean)
-        const letters = parts.slice(0, 2).map((p) => p[0] || "")
-        const joined = letters.join("").toUpperCase()
-        return joined || cleaned.slice(0, 2).toUpperCase()
+        const letters = parts.slice(0, 2).map((part) => part[0] || "")
+        return (letters.join("") || cleaned.slice(0, 2)).toUpperCase()
       }
 
-      function setBrand(){
-        const mark = document.getElementById("brandMark")
-        const title = document.getElementById("brandTitle")
-        const subtitle = document.getElementById("brandSubtitle")
-        if (mark) mark.textContent = initialsFromName(APP_NAME)
-        if (title) title.textContent = APP_NAME
-        if (subtitle) subtitle.textContent = APP_TAGLINE
+      function formatNumber(value) {
+        return new Intl.NumberFormat("id-ID").format(Number(value) || 0)
       }
 
-      function vocabFromRaw(list){
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#039;")
+      }
+
+      function vocabFromRaw(list) {
         return list
           .map((s) => String(s).trim())
           .filter(Boolean)
@@ -542,10 +437,28 @@
         }
       }
 
-      const correctMessages = ["せいかい！ (Benar) +10","いいね！ (Bagus) +10","そのとおり！ (Tepat) +10","やった！ (Mantap) +10"]
-      const wrongMessages = ["ざんねん… (Sayang)","ちがいます。 (Salah)","もういちど かくにん。 (Coba lagi)","つぎ いこう。 (Lanjut)"]
+      const correctMessages = [
+        "Perfect. Kamu baca pola soalnya dengan tepat.",
+        "Bagus. Ritme belajar kamu stabil.",
+        "Nice. Jawaban ini menambah XP dan momentum.",
+        "Mantap. Fokus kamu lagi bagus banget."
+      ]
 
-      function levelStats(lv){
+      const wrongMessages = [
+        "Belum tepat, tapi insight-nya langsung masuk ke review list.",
+        "Hampir. Coba perhatikan pola baca dan konteks kalimatnya.",
+        "Santai, jawaban ini bisa kamu ulang di review mode.",
+        "Masih aman. Lanjut dan perbaiki di soal berikutnya."
+      ]
+
+      const navItems = [
+        { screen: "home", label: "Home", icon: "⌂" },
+        { screen: "vocabulary", label: "Vocab", icon: "あ" },
+        { screen: "quiz", label: "Quiz", icon: "◉" },
+        { screen: "progress", label: "Progress", icon: "↗" }
+      ]
+
+      function levelStats(lv) {
         const vocabCount = lv.vocab.length
         const particleCount = lv.particleBank.length
         const patternCount = lv.patternBank.length
@@ -554,11 +467,11 @@
         return { vocabCount, particleCount, patternCount, storyCount, poolCount }
       }
 
-      function rand(list){
+      function rand(list) {
         return list[Math.floor(Math.random() * list.length)]
       }
 
-      function shuffle(arr){
+      function shuffle(arr) {
         const a = [...arr]
         for (let i = a.length - 1; i > 0; i -= 1) {
           const j = Math.floor(Math.random() * (i + 1))
@@ -569,7 +482,7 @@
         return a
       }
 
-      function pickDistinctIndices(poolLength, count, excludedIndex){
+      function pickDistinctIndices(poolLength, count, excludedIndex) {
         const indices = []
         while (indices.length < count) {
           const next = Math.floor(Math.random() * poolLength)
@@ -580,13 +493,13 @@
         return indices
       }
 
-      function optionClassByIndex(i){
-        if (i === 0) return "btn btn--a"
-        if (i === 1) return "btn btn--b"
-        return "btn btn--c"
+      function optionClassByIndex(i) {
+        if (i === 0) return "answer-btn answer-btn--a"
+        if (i === 1) return "answer-btn answer-btn--b"
+        return "answer-btn answer-btn--c"
       }
 
-      function makeReadingQuestion(levelKey, item, itemIndex, index){
+      function makeReadingQuestion(levelKey, item, itemIndex, index) {
         const level = levels[levelKey]
         const vocab = level.vocab
         const distractorIndices = pickDistinctIndices(vocab.length, 2, itemIndex)
@@ -599,16 +512,16 @@
           id: `${levelKey}-reading-${String(index + 1).padStart(4, "0")}`,
           type: "reading",
           typeLabel: "よみかた / Bacaan",
-          prompt: { primary: item.kanji, secondary: "（　）" },
+          prompt: { primary: item.kanji, secondary: "Pilih bacaan hiragana yang benar" },
           questionText: `「${item.kanji}」の よみかたは どれですか。`,
-          questionSub: "Pilih hiragana yang benar (ひらがなをえらんでください)。",
+          questionSub: "Pilih hiragana yang benar untuk kanji di atas.",
           options,
           correctOptionId,
-          feedbackCorrect: `${item.kanji}（${item.kana}）`
+          feedbackCorrect: `${item.kanji} (${item.kana})`
         }
       }
 
-      function makeKanjiQuestion(levelKey, item, itemIndex, index){
+      function makeKanjiQuestion(levelKey, item, itemIndex, index) {
         const level = levels[levelKey]
         const vocab = level.vocab
         const distractorIndices = pickDistinctIndices(vocab.length, 2, itemIndex)
@@ -621,16 +534,16 @@
           id: `${levelKey}-kanji-${String(index + 1).padStart(4, "0")}`,
           type: "kanji",
           typeLabel: "かんじ / Kanji",
-          prompt: { primary: item.kana, secondary: "（　）" },
+          prompt: { primary: item.kana, secondary: "Pilih bentuk kanji yang benar" },
           questionText: `「${item.kana}」を かんじで かくと どれですか。`,
-          questionSub: "Pilih kanji yang benar (かんじをえらんでください)。",
+          questionSub: "Cari bentuk kanji yang sesuai dengan bacaan di atas.",
           options,
           correctOptionId,
-          feedbackCorrect: `${item.kanji}（${item.kana}）`
+          feedbackCorrect: `${item.kanji} (${item.kana})`
         }
       }
 
-      function makeParticleQuestion(levelKey, entry, index){
+      function makeParticleQuestion(levelKey, entry, index) {
         const letters = ["A", "B", "C"]
         const opts = shuffle(entry.choices).slice(0, 3)
         const options = opts.map((t, i) => ({ id: letters[i], text: t }))
@@ -639,16 +552,16 @@
           id: `${levelKey}-particle-${String(index + 1).padStart(4, "0")}`,
           type: "particle",
           typeLabel: "じょし / Partikel",
-          prompt: { primary: entry.s, secondary: "（　）" },
+          prompt: { primary: entry.s, secondary: "Isi partikel yang paling tepat" },
           questionText: "（　）に はいる じょしは どれですか。",
-          questionSub: "Pilih partikel yang tepat (ひらがなをえらんでください)。",
+          questionSub: "Perhatikan konteks kalimat lalu pilih partikel yang benar.",
           options,
           correctOptionId,
-          feedbackCorrect: `${entry.a}`
+          feedbackCorrect: entry.a
         }
       }
 
-      function makePatternQuestion(levelKey, entry, index){
+      function makePatternQuestion(levelKey, entry, index) {
         const letters = ["A", "B", "C"]
         const opts = shuffle(entry.choices).slice(0, 3)
         const options = opts.map((t, i) => ({ id: letters[i], text: t }))
@@ -657,16 +570,16 @@
           id: `${levelKey}-pattern-${String(index + 1).padStart(4, "0")}`,
           type: "pattern",
           typeLabel: "ぶんぽう / Pola kalimat",
-          prompt: { primary: entry.s, secondary: "（　）" },
+          prompt: { primary: entry.s, secondary: "Lengkapi pola kalimat yang tepat" },
           questionText: "（　）に はいる ことばは どれですか。",
-          questionSub: "Pilih kata/frasa yang tepat (ことばをえらんでください)。",
+          questionSub: "Cari kata atau frasa yang paling natural untuk konteks kalimatnya.",
           options,
           correctOptionId,
-          feedbackCorrect: `${entry.a}`
+          feedbackCorrect: entry.a
         }
       }
 
-      function makeStoryQuestion(levelKey, entry, index){
+      function makeStoryQuestion(levelKey, entry, index) {
         const letters = ["A", "B", "C"]
         const opts = shuffle(entry.choices).slice(0, 3)
         const options = opts.map((t, i) => ({ id: letters[i], text: t }))
@@ -675,16 +588,16 @@
           id: `${levelKey}-story-${String(index + 1).padStart(4, "0")}`,
           type: "story",
           typeLabel: "どっかい / Dokai",
-          prompt: { primary: entry.t, secondary: "Bacaan pendek" },
+          prompt: { primary: entry.t, secondary: "Baca teks pendek lalu jawab" },
           questionText: entry.q,
-          questionSub: "Baca teks, lalu pilih jawaban yang tepat.",
+          questionSub: "Fokus ke informasi inti dan detail kecil pada teks.",
           options,
           correctOptionId,
-          feedbackCorrect: `${entry.choices[entry.a]}`
+          feedbackCorrect: entry.choices[entry.a]
         }
       }
 
-      function buildQuestionPool(levelKey){
+      function buildQuestionPool(levelKey) {
         const level = levels[levelKey]
         const pool = []
         for (let i = 0; i < level.vocab.length; i += 1) {
@@ -704,10 +617,16 @@
       }
 
       const app = document.getElementById("app")
-      const levelBadge = document.getElementById("levelBadge")
+      const brandMark = document.getElementById("brandMark")
+      const brandTitle = document.getElementById("brandTitle")
+      const brandSubtitle = document.getElementById("brandSubtitle")
+      const topbarActions = document.getElementById("topbarActions")
+      const screenBanner = document.getElementById("screenBanner")
+      const sidebar = document.getElementById("sidebar")
+      const bottomNav = document.getElementById("bottomNav")
 
       const state = {
-        screen: "start",
+        screen: "home",
         levelKey: "n5",
         mode: "normal",
         sessionQuestions: [],
@@ -716,22 +635,94 @@
         feedback: null,
         wrongList: [],
         savedWrongList: [],
-        overlay: null,
+        lastResult: null,
         profile: loadProfile()
       }
 
-      function setBadge(){
-        const label = levels[state.levelKey]?.label ?? "N5"
-        levelBadge.textContent = label
-        document.title = `${APP_NAME} (${label})`
-      }
-
-      function currentQuestion(){
+      function currentQuestion() {
         return state.sessionQuestions[state.questionIndex]
       }
 
-      function recordWrong(q, selectedText, correctText){
-        const existing = state.wrongList.find((x) => x.qId === q.id)
+      function currentLevel() {
+        return levels[state.levelKey]
+      }
+
+      function sessionProgressPercent() {
+        const total = state.sessionQuestions.length
+        if (!total) return 0
+        return Math.max(0, Math.min(100, Math.round(((state.questionIndex + 1) / total) * 100)))
+      }
+
+      function levelProgressData() {
+        const xp = state.profile.totalXp
+        const level = state.profile.level
+        const minXp = profileMinXpForLevel(level)
+        const nextXp = profileNextXpTarget(level)
+        const pct = nextXp ? Math.round(((xp - minXp) / Math.max(1, nextXp - minXp)) * 100) : 100
+        return {
+          xp,
+          level,
+          minXp,
+          nextXp,
+          pct: Math.max(0, Math.min(100, pct)),
+          xpNeeded: nextXp ? Math.max(0, nextXp - xp) : 0
+        }
+      }
+
+      function getResultMetrics() {
+        const total = state.sessionQuestions.length
+        const maxScore = total * POINTS_PER_CORRECT
+        const correctCount = Math.round(state.score / POINTS_PER_CORRECT)
+        const wrongCount = state.wrongList.reduce((acc, item) => acc + (item.count ?? 0), 0)
+        const accuracy = total ? Math.round((correctCount / total) * 100) : 0
+        return { total, maxScore, correctCount, wrongCount, accuracy }
+      }
+
+      function resultMessage(score, maxScore) {
+        const ratio = maxScore === 0 ? 0 : score / maxScore
+        if (ratio >= 0.9) return "Luar biasa. Kamu sudah masuk zona belajar premium."
+        if (ratio >= 0.75) return "Bagus banget. Tinggal sedikit lagi untuk performa top-tier."
+        if (ratio >= 0.55) return "Progress kamu sehat. Konsistensi akan bikin skor naik cepat."
+        return "Pondasinya sudah ada. Review yang salah lalu ulangi dengan ritme santai."
+      }
+
+      function learningAchievements() {
+        const result = state.lastResult || getResultMetrics()
+        const accuracy = result.accuracy || 0
+        const xp = state.profile.totalXp
+        const streak = state.profile.streak
+        const sessionsPlayed = state.profile.sessionsPlayed
+
+        return [
+          {
+            icon: "⚡",
+            title: "XP Builder",
+            desc: "Kumpulkan total 250 XP untuk membuka momentum belajar yang stabil.",
+            earned: xp >= 250
+          },
+          {
+            icon: "🔥",
+            title: "Streak Keeper",
+            desc: "Pertahankan streak minimal 3 hari agar habit belajar makin kebentuk.",
+            earned: streak >= 3
+          },
+          {
+            icon: "🎯",
+            title: "Sharp Accuracy",
+            desc: "Capai akurasi sesi minimal 80% untuk menunjukkan pemahaman yang solid.",
+            earned: accuracy >= 80
+          },
+          {
+            icon: "🚀",
+            title: "Committed Learner",
+            desc: "Mainkan minimal 5 sesi agar pola belajar terasa natural dan konsisten.",
+            earned: sessionsPlayed >= 5
+          }
+        ]
+      }
+
+      function recordWrong(q, selectedText, correctText) {
+        const existing = state.wrongList.find((item) => item.qId === q.id)
         if (!existing) {
           state.wrongList.push({ qId: q.id, q, selectedText, correctText, count: 1 })
           return
@@ -741,21 +732,20 @@
         existing.correctText = correctText
       }
 
-      function buildWrongReviewQuestions(){
+      function buildWrongReviewQuestions() {
         const base = state.savedWrongList.length ? state.savedWrongList : state.wrongList
         const uniq = []
         const seen = new Set()
         for (const item of base) {
           const id = item.q?.id
-          if (!id) continue
-          if (seen.has(id)) continue
+          if (!id || seen.has(id)) continue
           seen.add(id)
           uniq.push(item.q)
         }
         return shuffle(uniq)
       }
 
-      function buildSessionQuestions(){
+      function buildSessionQuestions() {
         const pool = buildQuestionPool(state.levelKey)
         const size = Math.min(Math.max(SESSION_SIZE_TARGET, 100), 200)
         const shuffled = shuffle(pool)
@@ -767,365 +757,626 @@
         return out
       }
 
-      function startWrongReview(){
-        if (markProfileActive(state.profile)) saveProfile(state.profile)
-        state.mode = "reviewWrong"
-        state.screen = "quiz"
-        state.sessionQuestions = buildWrongReviewQuestions()
-        state.questionIndex = 0
-        state.score = 0
-        state.feedback = null
-        state.wrongList = []
-        state.overlay = null
-        setBadge()
-        render()
+      function setBrand() {
+        brandMark.textContent = initialsFromName(APP_NAME)
+        brandTitle.textContent = APP_NAME
+        brandSubtitle.textContent = APP_TAGLINE
       }
 
-      function resetGame(){
-        state.screen = "start"
-        state.mode = "normal"
-        state.questionIndex = 0
-        state.score = 0
-        state.feedback = null
-        state.wrongList = []
-        state.savedWrongList = []
-        state.overlay = null
-        setBadge()
-        render()
+      function setDocumentTitle() {
+        const screenLabel = screenMeta[state.screen]?.eyebrow ?? "Dashboard"
+        document.title = `${APP_NAME} • ${screenLabel} • ${currentLevel().label}`
       }
 
-      function startGame(){
-        if (markProfileActive(state.profile)) saveProfile(state.profile)
-        state.screen = "quiz"
-        state.mode = "normal"
-        state.sessionQuestions = buildSessionQuestions()
-        state.questionIndex = 0
-        state.score = 0
-        state.feedback = null
-        state.wrongList = []
-        state.savedWrongList = []
-        state.overlay = null
-        setBadge()
-        render()
+      function buttonHtml({ label, action, variant = "primary", screen = "", extra = "", disabled = false }) {
+        const attrs = [
+          `class="button button--${variant} ${extra}"`,
+          `data-action="${escapeHtml(action)}"`
+        ]
+        if (screen) attrs.push(`data-screen="${escapeHtml(screen)}"`)
+        if (disabled) attrs.push("disabled")
+        return `<button ${attrs.join(" ")}>${escapeHtml(label)}</button>`
       }
 
-      function showOverlay(kind){
-        state.overlay = kind
-        render()
+      function navLinkHtml(item, activeScreen) {
+        const isActive = item.screen === activeScreen
+        return `
+          <button class="nav-link ${isActive ? "is-active" : ""}" data-action="navigate" data-screen="${item.screen}">
+            <span class="nav-link__icon" aria-hidden="true">${item.icon}</span>
+            <span>${item.label}</span>
+          </button>
+        `
       }
 
-      function closeOverlay(){
-        state.overlay = null
-        render()
-      }
-
-      function resultMessage(score, maxScore){
-        const ratio = maxScore === 0 ? 0 : score / maxScore
-        if (ratio >= 0.9) return "すごい！ (Luar biasa)"
-        if (ratio >= 0.75) return "いいね！ (Bagus sekali)"
-        if (ratio >= 0.55) return "だいじょうぶ。 (Terus latihan)"
-        return "あせらないで。 (Pelan-pelan ya)"
-      }
-
-      function renderStart(){
-        const totalQuestions = SESSION_SIZE_TARGET
-        const maxScore = totalQuestions * POINTS_PER_CORRECT
-
-        const xp = state.profile.totalXp
-        const lvl = state.profile.level
-        const streak = state.profile.streak
-        const minXp = profileMinXpForLevel(lvl)
-        const nextXp = profileNextXpTarget(lvl)
-        const pct = nextXp ? Math.round(((xp - minXp) / Math.max(1, nextXp - minXp)) * 100) : 100
-        const xpNeeded = nextXp ? Math.max(0, nextXp - xp) : 0
-        const xpLine = nextXp ? `XP <b>${xp}</b> • Butuh <b>${xpNeeded}</b> XP lagi ke Level <b>${lvl + 1}</b>` : `XP <b>${xp}</b> • Level <b>${lvl}</b> (MAX)`
-
-        const cards = Object.entries(levels)
-          .map(([key, lv]) => {
-            const lock = lv.locked
-            const lockText = lock ? "🔒" : "✅"
-            const title = `${lv.label}`
-            const desc = `${lv.aboutJp} / ${lv.aboutId}`
-            const st = levelStats(lv)
-            return `
-              <div class="level">
-                <div class="level__top">
-                  <div>
-                    <div class="level__name">${title}</div>
-                    <div class="level__desc">${desc}</div>
-                    <div class="level__meta">
-                      <div class="tag">Bank: <b>${st.poolCount}</b> soal</div>
-                      <div class="tag">Vocab: <b>${st.vocabCount}</b> (x2)</div>
-                      <div class="tag">Partikel: <b>${st.particleCount}</b></div>
-                      <div class="tag">Bunpou: <b>${st.patternCount}</b></div>
-                      <div class="tag">Dokai: <b>${st.storyCount}</b></div>
-                    </div>
-                  </div>
-                  <div class="level__lock" aria-hidden="true">${lockText}</div>
-                </div>
-                <button class="btn" data-action="pick-level" data-level="${key}">
-                  <span class="btn__label">Pilih ${lv.label}${lock ? " (Terkunci)" : ""}</span>
-                </button>
-              </div>
-            `
-          })
-          .join("")
-
-        app.innerHTML = `
-          <div class="panel">
-            <div class="hero">
-              <div class="hero__h">${APP_NAME}</div>
-              <div class="hero__p">
-                ${APP_TAGLINE}. Sesi <b>${totalQuestions}</b> soal. Benar: <b>+${POINTS_PER_CORRECT}</b> (maks. <b>${maxScore}</b>).<br/>
-                N5 dibuat lebih menantang dengan variasi vocab/partikel/bunpou/dokai yang lebih banyak.
-              </div>
+      function progressBarHtml(percent, labelStart, labelEnd) {
+        return `
+          <div>
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-fill" style="width:${Math.max(0, Math.min(100, percent))}%"></div>
             </div>
-
-            <div class="card">
-              <div class="row">
-                <div class="pill">🔥 Streak <span class="pill__muted">${streak}</span></div>
-                <div class="pill">⭐ Level <span class="pill__muted">${lvl}</span></div>
-              </div>
-              <div style="height:10px"></div>
-              <div class="progress" aria-hidden="true"><div class="progress__bar" style="width:${Math.max(0, Math.min(100, pct))}%"></div></div>
-              <div class="q__sub" style="margin-top:10px">${xpLine}</div>
-            </div>
-
-            <div class="card">
-              <div class="row">
-                <div class="pill">Level aktif <span class="pill__muted">${levels[state.levelKey].label}</span></div>
-                <div class="pill">Mode <span class="pill__muted">Normal</span></div>
-              </div>
-              <div class="q__sub" style="margin-top:10px">N4 & N3 sudah terbuka. Bank soalnya besar (ratusan+) dan bisa kamu review/rapikan.</div>
-            </div>
-
-            <div class="grid">${cards}</div>
-
-            <div class="cta">
-              <button class="btn" data-action="start"><span class="btn__label">スタート / Mulai</span></button>
+            <div class="progress-meta">
+              <span>${labelStart}</span>
+              <span>${labelEnd}</span>
             </div>
           </div>
         `
-
-        if (state.overlay === "locked") {
-          const overlay = document.createElement("div")
-          overlay.className = "overlay"
-          overlay.innerHTML = `
-            <div class="overlay__card">
-              <div class="hero" style="padding:6px 6px 0 6px">
-                <div class="hero__h" style="font-size:26px">Info level</div>
-                <div class="hero__p">Semua level sudah terbuka. Pilih level yang kamu mau.</div>
-              </div>
-              <div class="card">
-                <div class="q">Pilih level</div>
-                <div class="q__sub">Bank soal N4/N3 sudah disiapkan dalam jumlah besar dan bisa kamu review.</div>
-              </div>
-              <div class="cta">
-                <button class="btn" data-action="close-overlay"><span class="btn__label">OK</span></button>
-              </div>
-            </div>
-          `
-          app.appendChild(overlay)
-        }
       }
 
-      function renderQuiz(){
-        const q = currentQuestion()
-        const index = state.questionIndex
-        const total = state.sessionQuestions.length
+      function metricCardHtml(label, value, note, valueClass = "") {
+        return `
+          <article class="metric-card">
+            <p class="metric-card__label">${label}</p>
+            <p class="metric-card__value ${valueClass}">${value}</p>
+            <p class="metric-card__note">${note}</p>
+          </article>
+        `
+      }
 
-        const optionsHtml = q.options
-          .map((opt, i) => {
-            const isLocked = Boolean(state.feedback)
-            const isSelected = state.feedback?.selectedId === opt.id
-            const isCorrect = state.feedback?.correctId === opt.id
+      function renderTopbar() {
+        const progress = levelProgressData()
+        topbarActions.innerHTML = `
+          <div class="top-chip"><span>🔥</span><strong>${formatNumber(state.profile.streak)}</strong><span>day streak</span></div>
+          <div class="top-chip"><span>⭐</span><strong>${formatNumber(state.profile.totalXp)}</strong><span>XP</span></div>
+          <div class="top-chip top-chip--accent"><span>${currentLevel().label}</span><strong>Level ${progress.level}</strong></div>
+        `
+      }
 
-            let extra = ""
-            if (state.feedback && isSelected && state.feedback.isCorrect) extra = " btn--right"
-            if (state.feedback && isSelected && !state.feedback.isCorrect) extra = " btn--wrong"
-            if (state.feedback && !isSelected && isCorrect) extra = " btn--right"
+      function renderSidebar() {
+        const progress = levelProgressData()
+        const nextLevelCopy = progress.nextXp
+          ? `${formatNumber(progress.xpNeeded)} XP lagi menuju Level ${progress.level + 1}`
+          : `Kamu sudah mencapai level maksimum saat ini.`
 
+        sidebar.innerHTML = `
+          <section class="sidebar-card surface-card sidebar-profile">
+            <p class="sidebar-card__label">Learner Profile</p>
+            <div class="sidebar-profile__row">
+              <div class="sidebar-profile__avatar">${initialsFromName(APP_NAME)}</div>
+              <div>
+                <p class="sidebar-profile__name">Ngebut Learner</p>
+                <p class="sidebar-profile__sub">Active level ${currentLevel().label} • Ready for focused study</p>
+              </div>
+            </div>
+            ${progressBarHtml(progress.pct, `XP ${formatNumber(progress.xp)}`, progress.nextXp ? `Target ${formatNumber(progress.nextXp)}` : "MAX")}
+            <p class="surface-card__note">${nextLevelCopy}</p>
+          </section>
+
+          <section class="sidebar-card surface-card">
+            <p class="sidebar-card__label">Navigation</p>
+            <div class="nav-list">
+              ${navItems.map((item) => navLinkHtml(item, state.screen)).join("")}
+            </div>
+          </section>
+
+          <section class="sidebar-card surface-card">
+            <p class="sidebar-card__label">Quick Actions</p>
+            <div class="stack">
+              ${buttonHtml({ label: "Mulai Sesi Baru", action: "start", variant: "primary" })}
+              ${buttonHtml({ label: "Review Vocabulary", action: "navigate", screen: "vocabulary", variant: "secondary" })}
+              ${buttonHtml({ label: "Buka Progress", action: "navigate", screen: "progress", variant: "ghost" })}
+            </div>
+          </section>
+        `
+      }
+
+      function renderBottomNav() {
+        bottomNav.innerHTML = navItems.map((item) => navLinkHtml(item, state.screen)).join("")
+      }
+
+      function renderScreenBanner() {
+        const meta = screenMeta[state.screen] || screenMeta.home
+        screenBanner.innerHTML = `
+          <div>
+            <p class="screen-banner__eyebrow">${meta.eyebrow}</p>
+            <h1 class="screen-banner__title">${meta.title}</h1>
+            <p class="screen-banner__meta">${meta.description}</p>
+          </div>
+          <div class="screen-banner__actions">
+            ${meta.actions.map((item) => buttonHtml(item)).join("")}
+          </div>
+        `
+      }
+
+      function renderHome() {
+        const activeLevel = currentLevel()
+        const stats = levelStats(activeLevel)
+        const progress = levelProgressData()
+        const achievements = learningAchievements().slice(0, 3)
+        const totalQuestions = SESSION_SIZE_TARGET
+        const sessionXp = totalQuestions * POINTS_PER_CORRECT
+
+        const levelCards = Object.entries(levels)
+          .map(([key, level]) => {
+            const isActive = key === state.levelKey
+            const lvStats = levelStats(level)
             return `
-              <button class="${optionClassByIndex(i)}${extra}" data-action="answer" data-option-id="${opt.id}" ${isLocked ? "disabled" : ""}>
-                <div class="btn__top">
-                  <div class="btn__label">${opt.text}</div>
-                  <div class="btn__tag" aria-hidden="true">${opt.id}</div>
+              <article class="level-card">
+                <div class="level-card__head">
+                  <div class="level-card__title-wrap">
+                    <p class="level-card__meta">Level Track</p>
+                    <h3 class="level-card__title">${level.label}</h3>
+                    <p class="level-card__desc">${level.aboutJp} / ${level.aboutId}</p>
+                  </div>
+                  <span class="status-pill ${isActive ? "status-pill--success" : "status-pill--info"}">${isActive ? "Active" : "Available"}</span>
                 </div>
-              </button>
+                <div class="level-card__stats">
+                  <span class="chip">${formatNumber(lvStats.poolCount)} soal</span>
+                  <span class="chip">${formatNumber(lvStats.vocabCount)} vocab</span>
+                  <span class="chip">${formatNumber(lvStats.storyCount)} dokai</span>
+                </div>
+                <p class="level-card__note">Dirancang untuk sesi belajar cepat, review ringan, dan transisi yang rapi antar mode latihan.</p>
+                <div class="level-card__actions">
+                  <button class="level-action ${isActive ? "level-action--secondary" : "level-action--primary"}" data-action="pick-level" data-level="${key}">
+                    ${isActive ? "Level Aktif" : `Pilih ${level.label}`}
+                  </button>
+                  <button class="level-action level-action--secondary" data-action="navigate" data-screen="vocabulary">Preview Vocab</button>
+                </div>
+              </article>
             `
           })
           .join("")
+
+        const achievementCards = achievements
+          .map((item) => `
+            <article class="achievement-card ${item.earned ? "is-earned" : ""}">
+              <div class="achievement-card__icon" aria-hidden="true">${item.icon}</div>
+              <h3 class="achievement-card__title">${item.title}</h3>
+              <p class="achievement-card__desc">${item.desc}</p>
+              <span class="status-pill ${item.earned ? "status-pill--success" : "status-pill--warning"}">${item.earned ? "Unlocked" : "In progress"}</span>
+            </article>
+          `)
+          .join("")
+
+        app.innerHTML = `
+          <section class="hero-panel">
+            <div class="hero-panel__content">
+              <div class="hero-mission">
+                <span class="hero-panel__eyebrow">Premium Educational SaaS Feel</span>
+                <h2 class="hero-panel__title">Yuk coba cara belajar JLPT yang lebih seru, rapi, dan bikin kamu ingin lanjut terus.</h2>
+                <p class="hero-panel__description">
+                  Dalam satu sesi, kamu akan mengerjakan <strong>${formatNumber(totalQuestions)}</strong> soal dan bisa mengumpulkan hingga <strong>${formatNumber(sessionXp)} XP</strong>. Tampilan dibuat sederhana, nyaman di HP, dan mudah dipakai saat belajar.
+                </p>
+              </div>
+              <div class="hero-panel__actions">
+                ${buttonHtml({ label: "Start Focus Session", action: "start", variant: "primary" })}
+                ${buttonHtml({ label: "Open Vocabulary", action: "navigate", screen: "vocabulary", variant: "secondary" })}
+                ${buttonHtml({ label: "Track My Progress", action: "navigate", screen: "progress", variant: "ghost" })}
+              </div>
+              <div class="hero-panel__stats">
+                ${metricCardHtml("Learner Level", `Level ${progress.level}`, `Aktif di ${activeLevel.label} dengan visual progress ke level berikutnya.`, "metric-card__value--primary")}
+                ${metricCardHtml("Study Streak", `${formatNumber(state.profile.streak)} hari`, "Semakin konsisten, semakin cepat XP dan rasa progres naik.")}
+                ${metricCardHtml("Question Pool", `${formatNumber(stats.poolCount)} item`, "Campuran reading, kanji, partikel, bunpou, dan dokai.")}
+              </div>
+            </div>
+          </section>
+
+          <section class="summary-grid">
+            ${metricCardHtml("XP Progress", `${progress.pct}%`, progress.nextXp ? `${formatNumber(progress.xpNeeded)} XP lagi ke level berikutnya.` : "Sudah mencapai level maksimum saat ini.")}
+            ${metricCardHtml("Best Accuracy", `${formatNumber(state.profile.bestAccuracy)}%`, "Skor terbaik dipakai untuk memotivasi peningkatan performa berikutnya.")}
+            ${metricCardHtml("Sessions Played", formatNumber(state.profile.sessionsPlayed), "Jumlah sesi lengkap yang sudah kamu selesaikan.")}
+          </section>
+
+          <section class="surface-card">
+            <div class="surface-card__header">
+              <div>
+                <p class="section-caption">Level Selection</p>
+                <h2 class="section-title">Pilih track belajar sesuai target JLPT kamu</h2>
+                <p class="section-note">Semua level dibuat dengan komponen kartu yang reusable supaya pengalaman antar screen tetap konsisten.</p>
+              </div>
+              <div class="chip-row">
+                <span class="chip">Rounded 24px</span>
+                <span class="chip">Glassmorphism</span>
+                <span class="chip">Micro interactions</span>
+              </div>
+            </div>
+            <div class="level-grid">${levelCards}</div>
+          </section>
+
+          <section class="surface-card">
+            <div class="surface-card__header">
+              <div>
+                <p class="section-caption">Achievements</p>
+                <h2 class="section-title">Reward system yang mendorong konsistensi</h2>
+                <p class="section-note">Visual achievement membantu pengguna remaja maupun dewasa merasa progresnya lebih bermakna.</p>
+              </div>
+            </div>
+            <div class="achievement-grid">${achievementCards}</div>
+          </section>
+        `
+      }
+
+      function renderVocabulary() {
+        const activeLevel = currentLevel()
+        const stats = levelStats(activeLevel)
+        const vocabCards = activeLevel.vocab.slice(0, VOCAB_PREVIEW_LIMIT)
+          .map((item, index) => `
+            <article class="vocab-card">
+              <span class="badge vocab-card__badge">#${index + 1}</span>
+              <h3 class="vocab-card__kanji">${item.kanji}</h3>
+              <p class="vocab-card__kana">${item.kana}</p>
+              <p class="vocab-card__desc">Flashcard singkat untuk review cepat sebelum masuk ke sesi quiz.</p>
+            </article>
+          `)
+          .join("")
+
+        app.innerHTML = `
+          <section class="surface-card">
+            <div class="surface-card__header">
+              <div>
+                <p class="section-caption">Vocabulary Overview</p>
+                <h2 class="section-title">${activeLevel.label} vocabulary deck</h2>
+                <p class="section-note">Deck menampilkan contoh kartu yang bisa langsung dipakai sebagai basis screen kosakata production-ready.</p>
+              </div>
+              <div class="filter-row">
+                ${Object.entries(levels).map(([key, level]) => `
+                  <button class="filter-chip ${key === state.levelKey ? "is-active" : ""}" data-action="pick-level" data-level="${key}">
+                    ${level.label}
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+            <div class="kpi-grid">
+              ${metricCardHtml("Vocabulary", formatNumber(stats.vocabCount), "Koleksi kata utama untuk level aktif.")}
+              ${metricCardHtml("Particle Bank", formatNumber(stats.particleCount), "Bank latihan partikel untuk memperkuat konteks kalimat.")}
+              ${metricCardHtml("Pattern Bank", formatNumber(stats.patternCount), "Pola bunpou yang bisa diulang berkali-kali.")}
+              ${metricCardHtml("Dokai", formatNumber(stats.storyCount), "Latihan reading comprehension singkat untuk membangun endurance.")}
+            </div>
+          </section>
+
+          <section class="surface-card">
+            <div class="surface-card__header">
+              <div>
+                <p class="section-caption">Card Preview</p>
+                <h2 class="section-title">Reusable vocabulary cards</h2>
+                <p class="section-note">Kartu sengaja dibuat lega dan kontras agar nyaman dibaca di layar mobile.</p>
+              </div>
+              <div class="chip-row">
+                <span class="chip">Mobile-first</span>
+                <span class="chip">Clean type scale</span>
+                <span class="chip">Fast scanning</span>
+              </div>
+            </div>
+            <div class="vocab-grid">${vocabCards}</div>
+          </section>
+
+          <section class="insight-grid">
+            <article class="insight-card">
+              <p class="metric-card__label">Study Tip</p>
+              <p class="summary-card__value">Review 5 menit</p>
+              <p class="insight-card__note">Buka screen ini sebelum quiz untuk warm-up ringan dan mengurangi cognitive load saat menjawab soal.</p>
+            </article>
+          </section>
+        `
+      }
+
+      function renderQuizEmpty() {
+        app.innerHTML = `
+          <section class="empty-state">
+            <p class="section-caption">No Active Session</p>
+            <h2 class="empty-state__title">Belum ada sesi yang berjalan.</h2>
+            <p class="empty-state__text">Mulai sesi baru dari dashboard untuk melihat redesigned quiz screen dan interaction states-nya.</p>
+            <div class="feedback-panel__actions">
+              ${buttonHtml({ label: "Mulai Sesi", action: "start", variant: "primary" })}
+              ${buttonHtml({ label: "Kembali Home", action: "navigate", screen: "home", variant: "ghost" })}
+            </div>
+          </section>
+        `
+      }
+
+      function renderQuiz() {
+        if (!state.sessionQuestions.length) {
+          renderQuizEmpty()
+          return
+        }
+
+        const q = currentQuestion()
+        const result = getResultMetrics()
+
+        const optionsHtml = q.options.map((opt, index) => {
+          const isLocked = Boolean(state.feedback)
+          const isSelected = state.feedback?.selectedId === opt.id
+          const isCorrect = state.feedback?.correctId === opt.id
+          const classes = [optionClassByIndex(index)]
+          if (state.feedback && isSelected && isCorrect) classes.push("is-correct")
+          if (state.feedback && isSelected && !isCorrect) classes.push("is-wrong")
+          if (state.feedback && !isSelected && isCorrect) classes.push("is-correct")
+
+          return `
+            <button class="${classes.join(" ")}" data-action="answer" data-option-id="${opt.id}" ${isLocked ? "disabled" : ""}>
+              <div class="answer-btn__row">
+                <div>
+                  <p class="answer-btn__label">${opt.text}</p>
+                  <p class="option-sub">Jawaban ${opt.id} untuk ${q.typeLabel}</p>
+                </div>
+                <span class="answer-btn__tag" aria-hidden="true">${opt.id}</span>
+              </div>
+            </button>
+          `
+        }).join("")
 
         const feedbackHtml = state.feedback
-          ? (() => {
-              const isCorrect = state.feedback.isCorrect
-              const title = isCorrect ? "せいかい (Benar)" : "ちがいます (Salah)"
-              const body = isCorrect
-                ? rand(correctMessages)
-                : `${rand(wrongMessages)}<br/>こたえ (Jawaban): <b>${state.feedback.correctText}</b>`
-
-              return `
-                <div class="feedback" role="status" aria-live="polite">
-                  <div class="feedback__h">${title}</div>
-                  <div class="feedback__p">${body}</div>
-                  <div class="cta">
-                    <button class="btn" data-action="next"><span class="btn__label">つぎへ / Lanjut</span></button>
-                    <button class="small" data-action="restart">Ulang</button>
-                    <button class="small" data-action="reset">Halaman awal</button>
-                  </div>
+          ? `
+            <section class="feedback-panel">
+              <div class="feedback-panel__top">
+                <div class="feedback-panel__icon" aria-hidden="true">${state.feedback.isCorrect ? "✓" : "!"}</div>
+                <div class="feedback-panel__body">
+                  <h3 class="feedback-panel__title">${state.feedback.isCorrect ? "Jawaban benar" : "Belum tepat"}</h3>
+                  <p class="feedback-panel__text">
+                    ${state.feedback.isCorrect ? rand(correctMessages) : `${rand(wrongMessages)} Jawaban yang benar: <strong>${state.feedback.correctText}</strong>.`}
+                  </p>
                 </div>
-              `
-            })()
-          : ``
-
-        const primary = q.prompt?.primary ?? ""
-        const secondary = q.prompt?.secondary ?? ""
-
-        app.innerHTML = `
-          <div class="panel">
-            <div class="row">
-              <div class="pill">Soal <span class="pill__muted">${index + 1}</span> / <span class="pill__muted">${total}</span></div>
-              <div class="pill">Level <span class="pill__muted">${levels[state.levelKey].label}</span></div>
-              <div class="pill pill--type">${q.typeLabel}</div>
-              <div class="pill">Skor <span class="pill__muted">${state.score}</span></div>
-              <button class="small" data-action="restart">Ulang</button>
-              <button class="small" data-action="reset">Halaman awal</button>
-            </div>
-
-            <div class="progress" aria-hidden="true"><div class="progress__bar" style="width:${Math.round(((index + 1) / total) * 100)}%"></div></div>
-
-            <div class="card">
-              <div class="prompt">
-                <div class="prompt__primary">${primary}</div>
-                <div class="prompt__secondary">${secondary}</div>
               </div>
-            </div>
-
-            <div class="card">
-              <div class="q">${q.questionText}</div>
-              <div class="q__sub">${q.questionSub}</div>
-            </div>
-
-            <div class="answers">${optionsHtml}</div>
-
-            ${feedbackHtml}
-          </div>
-        `
-      }
-
-      function renderWrongList(){
-        const list = state.savedWrongList.length ? state.savedWrongList : state.wrongList
-        const totalWrong = list.reduce((acc, x) => acc + (x.count ?? 0), 0)
-
-        const itemsHtml = list
-          .map((it) => {
-            const q = it.q
-            const type = q?.typeLabel ?? ""
-            const p1 = q?.prompt?.primary ?? ""
-            const p2 = q?.prompt?.secondary ?? ""
-            const qt = q?.questionText ?? ""
-            const sel = it.selectedText ?? ""
-            const cor = it.correctText ?? ""
-            const count = it.count ?? 1
-
-            return `
-              <div class="card">
-                <div class="row" style="justify-content:space-between">
-                  <div class="pill pill--type">${type}</div>
-                  <div class="pill">× <span class="pill__muted">${count}</span></div>
-                </div>
-                <div style="height:10px"></div>
-                <div class="q">${qt}</div>
-                <div class="q__sub">${p1} ${p2}</div>
-                <div style="height:10px"></div>
-                <div class="q__sub">Jawaban kamu: <b>${sel}</b></div>
-                <div class="q__sub">Jawaban benar: <b>${cor}</b></div>
+              <div class="feedback-panel__actions">
+                ${buttonHtml({ label: "Lanjut", action: "next", variant: "primary" })}
+                ${buttonHtml({ label: "Ulangi Sesi", action: "restart", variant: "secondary" })}
+                ${buttonHtml({ label: "Home", action: "reset", variant: "ghost" })}
               </div>
-            `
-          })
-          .join("")
+            </section>
+          `
+          : ""
 
         app.innerHTML = `
-          <div class="panel">
-            <div class="hero">
-              <div class="hero__h">まちがいリスト (Daftar Salah)</div>
-              <div class="hero__p">Total salah: <b>${totalWrong}</b> / item: <b>${list.length}</b></div>
-            </div>
-
-            ${list.length ? itemsHtml : `<div class="card"><div class="q" style="text-align:center">Belum ada jawaban salah.</div></div>`}
-
-            <div class="cta">
-              <button class="btn" data-action="review-wrong" ${list.length ? "" : "disabled"}><span class="btn__label">Ulangi yang salah</span></button>
-              <button class="small" data-action="back-result">Kembali</button>
-              <button class="small" data-action="reset">Halaman awal</button>
-            </div>
-          </div>
-        `
-      }
-
-      function renderResult(){
-        const total = state.sessionQuestions.length
-        const maxScore = total * POINTS_PER_CORRECT
-        const msg = resultMessage(state.score, maxScore)
-        const correctCount = Math.round(state.score / POINTS_PER_CORRECT)
-        const wrongCount = state.wrongList.reduce((acc, x) => acc + (x.count ?? 0), 0)
-        const accuracy = total ? Math.round((correctCount / total) * 100) : 0
-        const st = levelStats(levels[state.levelKey])
-        const ringBg = `conic-gradient(rgba(69,230,182,.95) ${accuracy}%, rgba(255,255,255,.10) 0)`
-
-        app.innerHTML = `
-          <div class="panel">
-            <div class="resultGrid">
-              <div class="nb-card">
-                <div class="resultHero">
+          <section class="question-shell">
+            <div class="quiz-head">
+              <article class="surface-card">
+                <div class="panel-head">
                   <div>
-                    <div class="statKey">Result</div>
-                    <div class="scoreBig">${state.score}</div>
-                    <div class="scoreSub">/ ${maxScore} • Akurasi ${accuracy}%</div>
-                    <div class="q__sub" style="margin-top:10px">${msg}</div>
+                    <p class="section-caption">Session Control</p>
+                    <h2 class="panel-title">${currentLevel().label} practice flow</h2>
+                    <p class="section-note">Mode ${state.mode === "reviewWrong" ? "review jawaban salah" : "normal practice"} dengan feedback instan setelah submit.</p>
                   </div>
-                  <div class="ring" style="background:${ringBg}">
-                    <div class="ring__inner"><div class="ring__pct">${accuracy}%</div></div>
+                  <div class="chip-row">
+                    <span class="chip">Soal ${state.questionIndex + 1}/${state.sessionQuestions.length}</span>
+                    <span class="chip">Skor ${formatNumber(state.score)}</span>
+                    <span class="chip">${q.typeLabel}</span>
                   </div>
                 </div>
-              </div>
+                ${progressBarHtml(sessionProgressPercent(), `${sessionProgressPercent()}% selesai`, `${formatNumber(result.correctCount)} benar sementara`)}
+              </article>
 
-              <div class="stats">
-                <div class="nb-card">
-                  <div class="statKey">Level</div>
-                  <div class="statVal">${levels[state.levelKey].label}</div>
-                  <div class="q__sub">Bank: <b>${st.poolCount}</b> soal</div>
+              <article class="surface-card">
+                <div class="panel-head">
+                  <div>
+                    <p class="section-caption">XP Session</p>
+                    <h2 class="panel-title">Performance snapshot</h2>
+                  </div>
                 </div>
-                <div class="nb-card">
-                  <div class="statKey">Benar</div>
-                  <div class="statVal">${correctCount}</div>
-                  <div class="q__sub">+${POINTS_PER_CORRECT} per soal</div>
+                <div class="stack">
+                  ${metricCardHtml("Current Score", formatNumber(state.score), `Setiap jawaban benar memberi +${POINTS_PER_CORRECT} XP.`)}
+                  ${metricCardHtml("Wrong Answers", formatNumber(result.wrongCount), "Semua jawaban salah tersimpan untuk review mode.")}
                 </div>
-                <div class="nb-card">
-                  <div class="statKey">Salah</div>
-                  <div class="statVal">${wrongCount}</div>
-                  <button class="small" data-action="wrong-list" ${wrongCount ? "" : "disabled"} style="margin-top:10px">Daftar salah</button>
-                </div>
-                <div class="nb-card">
-                  <div class="statKey">Next</div>
-                  <div class="statVal">N4 / N3</div>
-                  <div class="q__sub">Coba level lebih tinggi</div>
-                </div>
-              </div>
+              </article>
             </div>
 
-            <div class="cta">
-              <button class="btn" data-action="start"><span class="btn__label">Main lagi</span></button>
-              <button class="btn" data-action="review-wrong" ${wrongCount ? "" : "disabled"}><span class="btn__label">Ulangi yang salah</span></button>
-              <button class="small" data-action="reset">Halaman awal</button>
-            </div>
-          </div>
+            <article class="surface-card quiz-prompt">
+              <div class="prompt-display">
+                <p class="prompt-display__primary">${q.prompt.primary}</p>
+                <p class="prompt-display__secondary">${q.prompt.secondary}</p>
+              </div>
+              <div class="question-copy">
+                <h3 class="question-copy__title">${q.questionText}</h3>
+                <p class="question-copy__sub">${q.questionSub}</p>
+              </div>
+            </article>
+
+            <section class="option-grid">${optionsHtml}</section>
+            ${feedbackHtml}
+          </section>
         `
       }
 
-      function render(){
-        if (state.screen === "start") {
-          renderStart()
+      function renderWrongList() {
+        const list = state.savedWrongList.length ? state.savedWrongList : state.wrongList
+
+        if (!list.length) {
+          app.innerHTML = `
+            <section class="empty-state">
+              <p class="section-caption">Review Clean</p>
+              <h2 class="empty-state__title">Belum ada jawaban salah untuk direview.</h2>
+              <p class="empty-state__text">Kalau kamu menjawab salah selama sesi, item-nya akan muncul di sini sebagai review card.</p>
+              <div class="feedback-panel__actions">
+                ${buttonHtml({ label: "Mulai Sesi", action: "start", variant: "primary" })}
+                ${buttonHtml({ label: "Kembali Hasil", action: "back-result", variant: "ghost" })}
+              </div>
+            </section>
+          `
+          return
+        }
+
+        const cards = list.map((item) => `
+          <article class="review-card">
+            <div class="review-card__head">
+              <div>
+                <p class="review-card__label">${item.q.typeLabel}</p>
+                <h3 class="review-card__title">${item.q.questionText}</h3>
+              </div>
+              <span class="status-pill status-pill--warning">x${item.count}</span>
+            </div>
+            <p class="review-card__prompt">${item.q.prompt.primary}</p>
+            <p class="review-card__note">Jawaban kamu: <strong>${item.selectedText}</strong></p>
+            <p class="review-card__note">Jawaban benar: <strong>${item.correctText}</strong></p>
+          </article>
+        `).join("")
+
+        app.innerHTML = `
+          <section class="surface-card">
+            <div class="surface-card__header">
+              <div>
+                <p class="section-caption">Wrong Answer Review</p>
+                <h2 class="section-title">Semua mistake cards dalam satu tempat</h2>
+                <p class="section-note">Pattern ini cocok untuk habit review singkat setelah sesi selesai.</p>
+              </div>
+            </div>
+            <div class="review-list">${cards}</div>
+            <div class="feedback-panel__actions">
+              ${buttonHtml({ label: "Ulangi Yang Salah", action: "review-wrong", variant: "primary", disabled: !list.length })}
+              ${buttonHtml({ label: "Kembali Ke Hasil", action: "back-result", variant: "secondary" })}
+              ${buttonHtml({ label: "Home", action: "reset", variant: "ghost" })}
+            </div>
+          </section>
+        `
+      }
+
+      function renderResult() {
+        const result = state.lastResult || getResultMetrics()
+        const message = resultMessage(state.score, result.maxScore)
+        const achievements = learningAchievements()
+        const ringStyle = `background: conic-gradient(var(--primary) ${result.accuracy}%, var(--secondary) ${result.accuracy}%, rgba(255,255,255,0.24) 0)`
+
+        const achievementCards = achievements.map((item) => `
+          <article class="achievement-card ${item.earned ? "is-earned" : ""}">
+            <div class="achievement-card__icon" aria-hidden="true">${item.icon}</div>
+            <h3 class="achievement-card__title">${item.title}</h3>
+            <p class="achievement-card__desc">${item.desc}</p>
+            <span class="status-pill ${item.earned ? "status-pill--success" : "status-pill--warning"}">${item.earned ? "Earned" : "Locked"}</span>
+          </article>
+        `).join("")
+
+        app.innerHTML = `
+          <section class="result-panel">
+            <article class="surface-card result-score">
+              <div class="result-score__wrap">
+                <div>
+                  <p class="section-caption">Session Result</p>
+                  <p class="result-score__value">${formatNumber(state.score)} / ${formatNumber(result.maxScore)}</p>
+                  <p class="result-score__note">${message}</p>
+                  <div class="feedback-panel__actions">
+                    ${buttonHtml({ label: "Main Lagi", action: "start", variant: "primary" })}
+                    ${buttonHtml({ label: "Review Yang Salah", action: "wrong-list", variant: "secondary", disabled: !result.wrongCount })}
+                    ${buttonHtml({ label: "Progress Dashboard", action: "navigate", screen: "progress", variant: "ghost" })}
+                  </div>
+                </div>
+                <div class="result-ring" style="${ringStyle}">
+                  <div class="result-ring__inner">
+                    <div class="result-ring__value">${result.accuracy}%</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <section class="metric-grid">
+              ${metricCardHtml("Correct", formatNumber(result.correctCount), `+${POINTS_PER_CORRECT} XP untuk tiap jawaban yang tepat.`)}
+              ${metricCardHtml("Wrong", formatNumber(result.wrongCount), "Semua kesalahan siap dipindahkan ke review mode.")}
+              ${metricCardHtml("Active Level", currentLevel().label, "Level latihan saat sesi ini dimainkan.")}
+              ${metricCardHtml("Session Mode", state.mode === "reviewWrong" ? "Review" : "Normal", "Mode ini memengaruhi jenis perjalanan belajar yang terasa di UI.")}
+            </section>
+
+            <section class="surface-card">
+              <div class="surface-card__header">
+                <div>
+                  <p class="section-caption">Achievement Cards</p>
+                  <h2 class="section-title">Reward yang langsung terasa setelah belajar</h2>
+                  <p class="section-note">Achievement cards membantu hasil belajar terasa lebih premium dan memotivasi.</p>
+                </div>
+              </div>
+              <div class="achievement-grid">${achievementCards}</div>
+            </section>
+          </section>
+        `
+      }
+
+      function renderProgress() {
+        const progress = levelProgressData()
+        const result = state.lastResult || getResultMetrics()
+        const achievements = learningAchievements()
+        const timeline = Object.entries(levels).map(([key, level]) => {
+          const isCurrent = key === state.levelKey
+          const isComplete = ["n5", "n4", "n3"].indexOf(key) < ["n5", "n4", "n3"].indexOf(state.levelKey)
+          const classes = ["timeline-card"]
+          if (isCurrent) classes.push("is-current")
+          if (isComplete) classes.push("is-complete")
+          return `
+            <article class="${classes.join(" ")}">
+              <span class="status-pill timeline-card__badge ${isCurrent ? "status-pill--info" : isComplete ? "status-pill--success" : "status-pill--warning"}">
+                ${isCurrent ? "Current" : isComplete ? "Completed" : "Available"}
+              </span>
+              <p class="timeline-card__label">${level.label}</p>
+              <p class="timeline-card__value">${formatNumber(levelStats(level).poolCount)} soal</p>
+              <p class="timeline-card__note">${level.aboutId}</p>
+            </article>
+          `
+        }).join("")
+
+        const achievementCards = achievements.map((item) => `
+          <article class="achievement-card ${item.earned ? "is-earned" : ""}">
+            <div class="achievement-card__icon" aria-hidden="true">${item.icon}</div>
+            <h3 class="achievement-card__title">${item.title}</h3>
+            <p class="achievement-card__desc">${item.desc}</p>
+          </article>
+        `).join("")
+
+        app.innerHTML = `
+          <section class="progress-grid">
+            ${metricCardHtml("Total XP", formatNumber(progress.xp), progress.nextXp ? `${formatNumber(progress.xpNeeded)} XP lagi ke level selanjutnya.` : "Level maksimum tercapai.", "metric-card__value--primary")}
+            ${metricCardHtml("Current Level", `Level ${progress.level}`, `Aktif belajar di track ${currentLevel().label}.`)}
+            ${metricCardHtml("Best Accuracy", `${formatNumber(state.profile.bestAccuracy)}%`, "Angka ini membantu pengguna membaca performa terbaiknya dengan cepat.")}
+            ${metricCardHtml("Sessions", formatNumber(state.profile.sessionsPlayed), "Total sesi selesai yang tersimpan di local profile.")}
+          </section>
+
+          <section class="surface-card progress-panel">
+            <div class="progress-head">
+              <div>
+                <p class="section-caption">XP System</p>
+                <h2 class="progress-head__title">Progress bar dan growth system</h2>
+                <p class="progress-note">Visual progress dibuat jelas, ringan, dan tetap terasa premium di layar kecil maupun desktop.</p>
+              </div>
+            </div>
+            ${progressBarHtml(progress.pct, `XP ${formatNumber(progress.xp)}`, progress.nextXp ? `Target ${formatNumber(progress.nextXp)}` : "MAX")}
+          </section>
+
+          <section class="surface-card">
+            <div class="surface-card__header">
+              <div>
+                <p class="section-caption">Learning Path</p>
+                <h2 class="section-title">Track progression per level</h2>
+                <p class="section-note">Timeline ini memvisualisasikan jalur pembelajaran seperti dashboard SaaS modern.</p>
+              </div>
+            </div>
+            <div class="performance-grid">${timeline}</div>
+          </section>
+
+          <section class="surface-card">
+            <div class="surface-card__header">
+              <div>
+                <p class="section-caption">Session Insight</p>
+                <h2 class="section-title">Snapshot performa terbaru</h2>
+                <p class="section-note">Cocok untuk menunjukkan progres personal yang mudah dipahami dalam 1 layar.</p>
+              </div>
+            </div>
+            <div class="summary-grid">
+              ${metricCardHtml("Latest Accuracy", `${formatNumber(result.accuracy)}%`, "Akurasi dari sesi terakhir yang tersimpan di memori aplikasi.")}
+              ${metricCardHtml("Latest Score", formatNumber(state.score), "Skor terbaru yang bisa langsung dibandingkan dengan sesi berikutnya.")}
+              ${metricCardHtml("Review Items", formatNumber(result.wrongCount), "Jumlah jawaban salah yang siap direview setelah sesi selesai.")}
+            </div>
+          </section>
+
+          <section class="surface-card">
+            <div class="surface-card__header">
+              <div>
+                <p class="section-caption">Achievement Library</p>
+                <h2 class="section-title">Reusable reward cards</h2>
+                <p class="section-note">Komponen ini bisa dipakai ulang di dashboard, results, maupun progress screen.</p>
+              </div>
+            </div>
+            <div class="achievement-grid">${achievementCards}</div>
+          </section>
+        `
+      }
+
+      function render() {
+        renderTopbar()
+        renderSidebar()
+        renderBottomNav()
+        renderScreenBanner()
+        setDocumentTitle()
+
+        if (state.screen === "home") {
+          renderHome()
+          return
+        }
+
+        if (state.screen === "vocabulary") {
+          renderVocabulary()
           return
         }
 
@@ -1139,71 +1390,133 @@
           return
         }
 
+        if (state.screen === "progress") {
+          renderProgress()
+          return
+        }
+
         renderResult()
       }
 
-      function onAnswer(optionId){
-        if (markProfileActive(state.profile)) saveProfile(state.profile)
+      function completeSessionIfNeeded() {
+        const result = getResultMetrics()
+        state.lastResult = result
+        registerSession(state.profile, result.accuracy)
+        saveProfile(state.profile)
+      }
+
+      function resetGame() {
+        state.screen = "home"
+        state.mode = "normal"
+        state.questionIndex = 0
+        state.score = 0
+        state.feedback = null
+        state.wrongList = []
+        state.savedWrongList = []
+        state.sessionQuestions = []
+        state.lastResult = null
+        render()
+      }
+
+      function startGame() {
+        markProfileActive(state.profile)
+        saveProfile(state.profile)
+        state.screen = "quiz"
+        state.mode = "normal"
+        state.sessionQuestions = buildSessionQuestions()
+        state.questionIndex = 0
+        state.score = 0
+        state.feedback = null
+        state.wrongList = []
+        state.savedWrongList = []
+        state.lastResult = null
+        render()
+      }
+
+      function startWrongReview() {
+        const base = state.savedWrongList.length ? state.savedWrongList : state.wrongList
+        if (!base.length) {
+          state.screen = "wrongList"
+          render()
+          return
+        }
+        markProfileActive(state.profile)
+        saveProfile(state.profile)
+        state.mode = "reviewWrong"
+        state.screen = "quiz"
+        state.sessionQuestions = buildWrongReviewQuestions()
+        state.questionIndex = 0
+        state.score = 0
+        state.feedback = null
+        state.wrongList = []
+        render()
+      }
+
+      function goToScreen(screen) {
+        if (screen === "quiz" && !state.sessionQuestions.length) {
+          state.screen = "quiz"
+          render()
+          return
+        }
+        state.screen = screen
+        render()
+      }
+
+      function onAnswer(optionId) {
         const q = currentQuestion()
+        if (!q) return
+        markProfileActive(state.profile)
+
         const correctOpt = q.options.find((o) => o.id === q.correctOptionId)
         const selectedOpt = q.options.find((o) => o.id === optionId)
         const isCorrect = optionId === q.correctOptionId
 
         if (isCorrect) {
           state.score += POINTS_PER_CORRECT
-          if (addXp(state.profile, POINTS_PER_CORRECT)) saveProfile(state.profile)
+          addXp(state.profile, POINTS_PER_CORRECT)
+          saveProfile(state.profile)
+        } else {
+          recordWrong(q, selectedOpt?.text ?? "", q.feedbackCorrect ?? correctOpt?.text ?? "")
         }
-
-        const correctText = q.feedbackCorrect ?? (correctOpt?.text ?? "")
-        const selectedText = selectedOpt?.text ?? ""
-        if (!isCorrect) recordWrong(q, selectedText, correctText)
 
         state.feedback = {
           isCorrect,
           selectedId: selectedOpt?.id ?? optionId,
           correctId: q.correctOptionId,
-          correctText
+          correctText: q.feedbackCorrect ?? correctOpt?.text ?? ""
         }
 
         render()
       }
 
-      function next(){
+      function next() {
         state.feedback = null
-
         if (state.questionIndex >= state.sessionQuestions.length - 1) {
+          completeSessionIfNeeded()
           state.screen = "result"
           render()
           return
         }
-
         state.questionIndex += 1
         render()
       }
 
-      app.addEventListener("click", (e) => {
-        const el = e.target instanceof Element ? e.target.closest("[data-action]") : null
-        if (!el) return
-
+      function handleAction(el) {
         const action = el.getAttribute("data-action")
         if (!action) return
 
         if (action === "pick-level") {
           const key = el.getAttribute("data-level")
-          if (!key) return
-          if (!levels[key]) return
-          if (levels[key].locked) {
-            showOverlay("locked")
-            return
-          }
+          if (!key || !levels[key]) return
           state.levelKey = key
-          setBadge()
           render()
           return
         }
 
-        if (action === "close-overlay") {
-          closeOverlay()
+        if (action === "navigate") {
+          const screen = el.getAttribute("data-screen")
+          if (!screen) return
+          goToScreen(screen)
           return
         }
 
@@ -1212,35 +1525,13 @@
           return
         }
 
-        if (action === "reset") {
-          resetGame()
-          return
-        }
-
         if (action === "restart") {
           startGame()
           return
         }
 
-        if (action === "wrong-list") {
-          if (!state.wrongList.length) return
-          state.savedWrongList = [...state.wrongList]
-          state.screen = "wrongList"
-          render()
-          return
-        }
-
-        if (action === "back-result") {
-          state.screen = "result"
-          render()
-          return
-        }
-
-        if (action === "review-wrong") {
-          const base = state.savedWrongList.length ? state.savedWrongList : state.wrongList
-          if (!base.length) return
-          if (!state.savedWrongList.length) state.savedWrongList = [...state.wrongList]
-          startWrongReview()
+        if (action === "reset") {
+          resetGame()
           return
         }
 
@@ -1254,11 +1545,44 @@
 
         if (action === "next") {
           next()
+          return
         }
-      })
+
+        if (action === "wrong-list") {
+          if (state.wrongList.length) state.savedWrongList = [...state.wrongList]
+          state.screen = "wrongList"
+          render()
+          return
+        }
+
+        if (action === "review-wrong") {
+          if (!state.savedWrongList.length && state.wrongList.length) {
+            state.savedWrongList = [...state.wrongList]
+          }
+          startWrongReview()
+          return
+        }
+
+        if (action === "back-result") {
+          state.screen = "result"
+          render()
+        }
+      }
+
+      function bindActionRoot(root) {
+        root.addEventListener("click", (event) => {
+          const el = event.target instanceof Element ? event.target.closest("[data-action]") : null
+          if (!el) return
+          handleAction(el)
+        })
+      }
+
+      bindActionRoot(app)
+      bindActionRoot(sidebar)
+      bindActionRoot(bottomNav)
+      bindActionRoot(screenBanner)
 
       setBrand()
-      setBadge()
       render()
     </script>
   </body>
