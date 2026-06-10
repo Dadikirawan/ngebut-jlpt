@@ -914,6 +914,54 @@ button {
   flex-wrap: wrap;
 }
 
+
+.explanation-card {
+  padding: 16px;
+  border-radius: 22px;
+  border-color: rgba(84, 27, 76, 0.16);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(84, 27, 76, 0.05));
+  display: grid;
+  gap: 12px;
+}
+
+.explanation-card__head {
+  display: grid;
+  gap: 6px;
+}
+
+.explanation-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.explanation-grid {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.explanation-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 170px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.explanation-row dt {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--muted-soft);
+  letter-spacing: 0.02em;
+}
+
+.explanation-row dd {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.55;
+  word-break: break-word;
+}
+
 .result-panel {
   display: grid;
   gap: 14px;
@@ -1409,6 +1457,10 @@ button {
 }
 
 @media (max-width: 639px) {
+  .explanation-row {
+    grid-template-columns: 1fr;
+  }
+
   .app-shell {
     padding: 0;
     padding-bottom: env(safe-area-inset-bottom);

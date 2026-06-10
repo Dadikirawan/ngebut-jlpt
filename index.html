@@ -228,6 +228,244 @@
           .replace(/'/g, "&#039;")
       }
 
+
+      function normalizeKana(input) {
+        const s = String(input || "")
+        let out = ""
+        for (let i = 0; i < s.length; i += 1) {
+          const code = s.charCodeAt(i)
+          if (code >= 0x30a1 && code <= 0x30f6) {
+            out += String.fromCharCode(code - 0x60)
+            continue
+          }
+          out += s[i]
+        }
+        return out
+      }
+
+      const ROMAJI_DIGRAPHS = {
+        きゃ: "kya",
+        きゅ: "kyu",
+        きょ: "kyo",
+        ぎゃ: "gya",
+        ぎゅ: "gyu",
+        ぎょ: "gyo",
+        しゃ: "sha",
+        しゅ: "shu",
+        しょ: "sho",
+        じゃ: "ja",
+        じゅ: "ju",
+        じょ: "jo",
+        ちゃ: "cha",
+        ちゅ: "chu",
+        ちょ: "cho",
+        にゃ: "nya",
+        にゅ: "nyu",
+        にょ: "nyo",
+        ひゃ: "hya",
+        ひゅ: "hyu",
+        ひょ: "hyo",
+        びゃ: "bya",
+        びゅ: "byu",
+        びょ: "byo",
+        ぴゃ: "pya",
+        ぴゅ: "pyu",
+        ぴょ: "pyo",
+        みゃ: "mya",
+        みゅ: "myu",
+        みょ: "myo",
+        りゃ: "rya",
+        りゅ: "ryu",
+        りょ: "ryo"
+      }
+
+      const ROMAJI_BASE = {
+        あ: "a",
+        い: "i",
+        う: "u",
+        え: "e",
+        お: "o",
+        か: "ka",
+        き: "ki",
+        く: "ku",
+        け: "ke",
+        こ: "ko",
+        さ: "sa",
+        し: "shi",
+        す: "su",
+        せ: "se",
+        そ: "so",
+        た: "ta",
+        ち: "chi",
+        つ: "tsu",
+        て: "te",
+        と: "to",
+        な: "na",
+        に: "ni",
+        ぬ: "nu",
+        ね: "ne",
+        の: "no",
+        は: "ha",
+        ひ: "hi",
+        ふ: "fu",
+        へ: "he",
+        ほ: "ho",
+        ま: "ma",
+        み: "mi",
+        む: "mu",
+        め: "me",
+        も: "mo",
+        や: "ya",
+        ゆ: "yu",
+        よ: "yo",
+        ら: "ra",
+        り: "ri",
+        る: "ru",
+        れ: "re",
+        ろ: "ro",
+        わ: "wa",
+        を: "o",
+        ん: "n",
+        が: "ga",
+        ぎ: "gi",
+        ぐ: "gu",
+        げ: "ge",
+        ご: "go",
+        ざ: "za",
+        じ: "ji",
+        ず: "zu",
+        ぜ: "ze",
+        ぞ: "zo",
+        だ: "da",
+        ぢ: "ji",
+        づ: "zu",
+        で: "de",
+        ど: "do",
+        ば: "ba",
+        び: "bi",
+        ぶ: "bu",
+        べ: "be",
+        ぼ: "bo",
+        ぱ: "pa",
+        ぴ: "pi",
+        ぷ: "pu",
+        ぺ: "pe",
+        ぽ: "po",
+        ぁ: "a",
+        ぃ: "i",
+        ぅ: "u",
+        ぇ: "e",
+        ぉ: "o",
+        ゃ: "ya",
+        ゅ: "yu",
+        ょ: "yo",
+        ゔ: "vu"
+      }
+
+      function geminatePrefix(romaji) {
+        if (!romaji) return ""
+        if (/^[aeiou]/.test(romaji)) return ""
+        if (romaji.startsWith("ch")) return "t"
+        return romaji[0]
+      }
+
+      function kanaToRomaji(input) {
+        const s = normalizeKana(input)
+        let out = ""
+        let geminate = false
+
+        for (let i = 0; i < s.length; i += 1) {
+          const ch = s[i]
+
+          if (ch === "っ") {
+            geminate = true
+            continue
+          }
+
+          if (ch === "ー") {
+            const lastVowel = out.match(/[aeiou](?!.*[aeiou])/)
+            if (lastVowel) out += lastVowel[0]
+            continue
+          }
+
+          const digraph = i + 1 < s.length ? s.slice(i, i + 2) : ""
+          let next = digraph && ROMAJI_DIGRAPHS[digraph] ? ROMAJI_DIGRAPHS[digraph] : null
+          if (next) i += 1
+          if (!next) next = ROMAJI_BASE[ch] ?? ch
+
+          if (geminate) {
+            out += geminatePrefix(next)
+            geminate = false
+          }
+
+          out += next
+        }
+
+        return out
+      }
+
+      const ANSWER_MEANING_ID = {
+        は: "penanda topik",
+        が: "penanda subjek",
+        を: "penanda objek",
+        に: "ke / pada / di (tujuan/waktu)",
+        へ: "ke arah",
+        で: "di (tempat) / dengan (alat)",
+        と: "dengan / dan",
+        の: "milik / yang",
+        まで: "sampai",
+        すぐ: "segera",
+        とても: "sangat",
+        いっしょに: "bersama",
+        ながら: "sambil",
+        おもしろい: "menarik",
+        だ: "kopula",
+        て: "bentuk te"
+      }
+
+      function extractKanaFromCorrectText(value) {
+        const s = String(value || "")
+        const match = s.match(/\(([^)]+)\)/)
+        if (match && match[1]) return match[1].trim()
+        return s.trim()
+      }
+
+      function extractHeadText(value) {
+        const s = String(value || "")
+        const idx = s.indexOf("(")
+        if (idx === -1) return s.trim()
+        return s.slice(0, idx).trim()
+      }
+
+      function buildAnswerExplanation(q, correctText) {
+        const correctAnswer = String(correctText || "")
+        const kana = extractKanaFromCorrectText(correctAnswer)
+        const romaji = kana ? kanaToRomaji(kana) : ""
+        const meaningId = ANSWER_MEANING_ID[kana] ?? ""
+        let exampleJp = ""
+        let exampleId = ""
+
+        if (q?.type === "particle" || q?.type === "pattern") {
+          exampleJp = String(q?.prompt?.primary || "").replace("（　）", kana)
+        } else if (q?.type === "story") {
+          exampleJp = String(q?.prompt?.primary || "")
+        } else if (q?.type === "reading" || q?.type === "kanji") {
+          const head = extractHeadText(correctAnswer)
+          if (head && kana) {
+            exampleJp = `「${head}」は「${kana}」です。`
+            exampleId = `“${head}” dibaca “${romaji}”.`
+          }
+        }
+
+        return {
+          correctAnswer,
+          romaji,
+          meaningId,
+          exampleJp,
+          exampleId
+        }
+      }
+
       function vocabFromRaw(list) {
         return list
           .map((s) => String(s).trim())
@@ -1179,6 +1417,13 @@
           `
         }).join("")
 
+
+        const explanation = state.feedback?.explanation
+        const displayField = (value) => {
+          const s = String(value || "").trim()
+          return s ? escapeHtml(s) : "—"
+        }
+
         const feedbackHtml = state.feedback
           ? `
             <section class="feedback-panel">
@@ -1187,10 +1432,39 @@
                 <div class="feedback-panel__body">
                   <h3 class="feedback-panel__title">${state.feedback.isCorrect ? "Jawaban benar" : "Belum tepat"}</h3>
                   <p class="feedback-panel__text">
-                    ${state.feedback.isCorrect ? rand(correctMessages) : `${rand(wrongMessages)} Jawaban yang benar: <strong>${state.feedback.correctText}</strong>.`}
+                    ${state.feedback.isCorrect ? rand(correctMessages) : `${rand(wrongMessages)} Jawaban yang benar: <strong>${escapeHtml(state.feedback.correctText)}</strong>.`}
                   </p>
                 </div>
               </div>
+
+              <article class="surface-card explanation-card">
+                <div class="explanation-card__head">
+                  <p class="section-caption">Explanation</p>
+                  <h4 class="explanation-card__title">Detail jawaban</h4>
+                </div>
+                <dl class="explanation-grid">
+                  <div class="explanation-row">
+                    <dt>Jawaban benar</dt>
+                    <dd><strong>${displayField(explanation?.correctAnswer ?? state.feedback.correctText)}</strong></dd>
+                  </div>
+                  <div class="explanation-row">
+                    <dt>Romaji</dt>
+                    <dd>${displayField(explanation?.romaji)}</dd>
+                  </div>
+                  <div class="explanation-row">
+                    <dt>Arti (ID)</dt>
+                    <dd>${displayField(explanation?.meaningId)}</dd>
+                  </div>
+                  <div class="explanation-row">
+                    <dt>Contoh kalimat</dt>
+                    <dd>${displayField(explanation?.exampleJp)}</dd>
+                  </div>
+                  <div class="explanation-row">
+                    <dt>Terjemahan (ID)</dt>
+                    <dd>${displayField(explanation?.exampleId)}</dd>
+                  </div>
+                </dl>
+              </article>
               <div class="feedback-panel__actions">
                 ${buttonHtml({ label: "Lanjut", action: "next", variant: "primary" })}
                 ${buttonHtml({ label: "Ulangi Sesi", action: "restart", variant: "secondary" })}
@@ -1555,20 +1829,22 @@
         const correctOpt = q.options.find((o) => o.id === q.correctOptionId)
         const selectedOpt = q.options.find((o) => o.id === optionId)
         const isCorrect = optionId === q.correctOptionId
+        const correctText = q.feedbackCorrect ?? correctOpt?.text ?? ""
 
         if (isCorrect) {
           state.score += POINTS_PER_CORRECT
           addXp(state.profile, POINTS_PER_CORRECT)
           saveProfile(state.profile)
         } else {
-          recordWrong(q, selectedOpt?.text ?? "", q.feedbackCorrect ?? correctOpt?.text ?? "")
+          recordWrong(q, selectedOpt?.text ?? "", correctText)
         }
 
         state.feedback = {
           isCorrect,
           selectedId: selectedOpt?.id ?? optionId,
           correctId: q.correctOptionId,
-          correctText: q.feedbackCorrect ?? correctOpt?.text ?? ""
+          correctText,
+          explanation: buildAnswerExplanation(q, correctText)
         }
 
         render()
