@@ -946,6 +946,7 @@
         sessionQuestions: [],
         questionIndex: 0,
         score: 0,
+        sessionEarnedXp: 0,
         feedback: null,
         wrongList: [],
         savedWrongList: [],
@@ -968,17 +969,17 @@
         const xp = state.profile.totalXp
         const levelKey = "n5"
         if (!state.roadmapCompleted || typeof state.roadmapCompleted !== "object") state.roadmapCompleted = {}
-        if (!state.roadmapCompleted[levelKey] || typeof state.roadmapCompleted[levelKey] !== "object") {
-          state.roadmapCompleted[levelKey] = {}
-        }
-        const map = state.roadmapCompleted[levelKey]
-        let changed = false
+        const prev = state.roadmapCompleted[levelKey] && typeof state.roadmapCompleted[levelKey] === "object"
+          ? state.roadmapCompleted[levelKey]
+          : {}
+        const next = {}
         for (let i = 0; i < milestones.length; i += 1) {
-          if (xp >= milestones[i].targetXp && !map[String(i)]) {
-            map[String(i)] = true
-            changed = true
-          }
+          if (xp >= milestones[i].targetXp) next[String(i)] = true
         }
+        const prevKeys = Object.keys(prev)
+        const nextKeys = Object.keys(next)
+        const changed = prevKeys.length !== nextKeys.length || nextKeys.some((key) => !prev[key])
+        state.roadmapCompleted[levelKey] = next
         return changed
       }
 
@@ -1908,14 +1909,28 @@
         const result = getResultMetrics()
         state.lastResult = result
         registerSession(state.profile, result.accuracy)
+        state.sessionEarnedXp = 0
         persistProgress()
       }
 
+      function rollbackActiveSessionXp() {
+        if (state.mode !== "normal") return false
+        if (!state.sessionQuestions.length || state.lastResult) return false
+        if (!state.sessionEarnedXp) return false
+        const xpChanged = addXp(state.profile, -state.sessionEarnedXp)
+        state.sessionEarnedXp = 0
+        const roadmapChanged = syncN5RoadmapCompletionFromXp()
+        if (xpChanged || roadmapChanged) persistProgress()
+        return xpChanged || roadmapChanged
+      }
+
       function resetGame() {
+        rollbackActiveSessionXp()
         state.screen = "home"
         state.mode = "normal"
         state.questionIndex = 0
         state.score = 0
+        state.sessionEarnedXp = 0
         state.feedback = null
         state.wrongList = []
         state.savedWrongList = []
@@ -1933,6 +1948,7 @@
         state.sessionQuestions = buildSessionQuestions()
         state.questionIndex = 0
         state.score = 0
+        state.sessionEarnedXp = 0
         state.feedback = null
         state.wrongList = []
         state.savedWrongList = []
@@ -1955,6 +1971,7 @@
         state.sessionQuestions = buildWrongReviewQuestions()
         state.questionIndex = 0
         state.score = 0
+        state.sessionEarnedXp = 0
         state.feedback = null
         state.wrongList = []
         render()
@@ -1985,10 +2002,13 @@
 
         if (isCorrect) {
           state.score += POINTS_PER_CORRECT
-          const xpChanged = addXp(state.profile, POINTS_PER_CORRECT)
-          if (xpChanged) {
-            syncN5RoadmapCompletionFromXp()
-            shouldPersist = true
+          if (state.mode !== "reviewWrong") {
+            const xpChanged = addXp(state.profile, POINTS_PER_CORRECT)
+            if (xpChanged) {
+              state.sessionEarnedXp += POINTS_PER_CORRECT
+              syncN5RoadmapCompletionFromXp()
+              shouldPersist = true
+            }
           }
         } else {
           recordWrong(q, selectedOpt?.text ?? "", correctText)
@@ -2044,6 +2064,7 @@
         }
 
         if (action === "restart") {
+          rollbackActiveSessionXp()
           startGame()
           return
         }
