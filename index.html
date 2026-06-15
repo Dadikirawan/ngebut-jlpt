@@ -175,7 +175,7 @@
       }
 
       function defaultProgressState() {
-        return { version: 1, profile: defaultProfile(), roadmapCompleted: {}, vocabProgress: {} }
+        return { version: 1, profile: defaultProfile(), roadmapCompleted: {}, vocabProgress: {}, roadmapLevelXp: {} }
       }
 
       function normalizeRoadmapCompleted(raw) {
@@ -207,6 +207,15 @@
         return out
       }
 
+      function normalizeRoadmapLevelXp(raw) {
+        if (!raw || typeof raw !== "object") return {}
+        const out = {}
+        for (const [levelKey, value] of Object.entries(raw)) {
+          out[String(levelKey)] = Math.max(0, Number(value) || 0)
+        }
+        return out
+      }
+
       function normalizeProgressState(raw) {
         const base = defaultProgressState()
         if (!raw || typeof raw !== "object") return base
@@ -214,7 +223,8 @@
           version: 1,
           profile: normalizeProfile(raw.profile),
           roadmapCompleted: normalizeRoadmapCompleted(raw.roadmapCompleted),
-          vocabProgress: normalizeVocabProgress(raw.vocabProgress)
+          vocabProgress: normalizeVocabProgress(raw.vocabProgress),
+          roadmapLevelXp: normalizeRoadmapLevelXp(raw.roadmapLevelXp)
         }
       }
 
@@ -226,7 +236,8 @@
               version: 1,
               profile: progress.profile,
               roadmapCompleted: progress.roadmapCompleted,
-              vocabProgress: progress.vocabProgress
+              vocabProgress: progress.vocabProgress,
+              roadmapLevelXp: progress.roadmapLevelXp
             })
           )
         } catch {}
@@ -275,9 +286,27 @@
         return true
       }
 
+      function addRoadmapLevelXp(levelKey, delta) {
+        if (!levelKey) return false
+        if (!state.roadmapLevelXp || typeof state.roadmapLevelXp !== "object") state.roadmapLevelXp = {}
+        const current = Math.max(0, Number(state.roadmapLevelXp[levelKey]) || 0)
+        const next = Math.max(0, current + (Number(delta) || 0))
+        if (next === current) return false
+        state.roadmapLevelXp[levelKey] = next
+        return true
+      }
+
+      function roadmapLevelXp(levelKey) {
+        return Math.max(0, Number(state.roadmapLevelXp?.[levelKey]) || 0)
+      }
+
       function registerSession(profile, accuracy) {
         profile.sessionsPlayed = Math.max(0, Number(profile.sessionsPlayed) || 0) + 1
         profile.bestAccuracy = Math.max(profile.bestAccuracy || 0, Number(accuracy) || 0)
+      }
+
+      function shouldTrackSessionProgression() {
+        return state.mode !== "reviewWrong"
       }
 
       function initialsFromName(name) {
@@ -557,8 +586,8 @@
           aboutJp: "よみかた・かんじ・じょし・ぶんぽう・どっかい",
           aboutId: "Bacaan, Kanji, Partikel, Pola kalimat, Dokai",
           vocab: vocabFromRaw([
-            "犬|いぬ","猫|ねこ","鳥|とり","魚|さかな","馬|うま","豚|ぶた","水|みず","本|ほん","学校|がっこう","先生|せんせい","学生|がくせい","時計|とけい","車|くるま","電車|でんしゃ","家|いえ","部屋|へや","友だち|ともだち","お母さん|おかあさん","お父さん|おとうさん",
-            "食べる|たべる","飲む|のむ","行く|いく","来る|くる","見る|みる","読む|よむ","書く|かく","大きい|おおきい","小さい|ちいさい","高い|たかい","安い|やすい","難しい|むずかしい","簡単|かんたん","早い|はやい","遅い|おそい","新しい|あたらしい","古い|ふるい","白い|しろい","黒い|くろい","赤い|あかい","青い|あおい","名前|なまえ","日本|にほん","今|いま","今日|きょう","明日|あした","昨日|きのう","毎日|まいにち","時間|じかん","駅|えき","店|みせ","道|みち","公園|こうえん","病院|びょういん","薬|くすり","電話|でんわ","仕事|しごと","会社|かいしゃ","休み|やすみ","天気|てんき","雨|あめ","雪|ゆき","風|かぜ","山|やま","川|かわ","海|うみ","朝|あさ","昼|ひる","夜|よる","週|しゅう","月曜日|げつようび","火曜日|かようび","水曜日|すいようび","木曜日|もくようび","金曜日|きんようび","土曜日|どようび","日曜日|にちようび","一つ|ひとつ","二つ|ふたつ","三つ|みっつ","四つ|よっつ","五つ|いつつ","六つ|むっつ","七つ|ななつ","八つ|やっつ","九つ|ここのつ","十|じゅう",
+            "犬|いぬ","猫|ねこ","何|なに","魚|さかな","人|ひと","ご飯|ごはん","水|みず","本|ほん","学校|がっこう","先生|せんせい","学生|がくせい","時計|とけい","車|くるま","電車|でんしゃ","家|いえ","部屋|へや","友だち|ともだち","お母さん|おかあさん","お父さん|おとうさん",
+            "食べる|たべる","飲む|のむ","行く|いく","来る|くる","見る|みる","読む|よむ","書く|かく","大きい|おおきい","小さい|ちいさい","高い|たかい","安い|やすい","難しい|むずかしい","悪い|わるい","早い|はやい","遅い|おそい","新しい|あたらしい","古い|ふるい","白い|しろい","黒い|くろい","赤い|あかい","青い|あおい","名前|なまえ","日本|にほん","今|いま","今日|きょう","明日|あした","昨日|きのう","毎日|まいにち","時間|じかん","駅|えき","店|みせ","道|みち","公園|こうえん","病院|びょういん","日本語|にほんご","電話|でんわ","仕事|しごと","会社|かいしゃ","休み|やすみ","天気|てんき","雨|あめ","雪|ゆき","風|かぜ","山|やま","川|かわ","海|うみ","朝|あさ","昼|ひる","夜|よる","毎週|まいしゅう","月曜日|げつようび","火曜日|かようび","水曜日|すいようび","木曜日|もくようび","金曜日|きんようび","土曜日|どようび","日曜日|にちようび","一つ|ひとつ","二つ|ふたつ","三つ|みっつ","四つ|よっつ","五つ|いつつ","六つ|むっつ","七つ|ななつ","八つ|やっつ","九つ|ここのつ","十|じゅう",
             "手|て","足|あし","目|め","耳|みみ","口|くち","頭|あたま","体|からだ","歩く|あるく","走る|はしる","買う|かう","売る|うる","会う|あう","話す|はなす","聞く|きく","待つ|まつ","入る|はいる","出る|でる","上|うえ","下|した","右|みぎ","左|ひだり","前|まえ","後ろ|うしろ"
           ]),
           particleBank: [
@@ -947,26 +976,29 @@
         questionIndex: 0,
         score: 0,
         sessionEarnedXp: 0,
+        sessionN5RoadmapXpEarned: 0,
         feedback: null,
         wrongList: [],
         savedWrongList: [],
         lastResult: null,
         profile: initialProgress.profile,
         roadmapCompleted: initialProgress.roadmapCompleted,
-        vocabProgress: initialProgress.vocabProgress
+        vocabProgress: initialProgress.vocabProgress,
+        roadmapLevelXp: initialProgress.roadmapLevelXp
       }
 
       function persistProgress() {
         saveProgressState({
           profile: state.profile,
           roadmapCompleted: state.roadmapCompleted,
-          vocabProgress: state.vocabProgress
+          vocabProgress: state.vocabProgress,
+          roadmapLevelXp: state.roadmapLevelXp
         })
       }
 
-      function syncN5RoadmapCompletionFromXp() {
+      function syncN5RoadmapCompletionFromN5Xp() {
         const milestones = n5RoadmapMilestones()
-        const xp = state.profile.totalXp
+        const xp = roadmapLevelXp("n5")
         const levelKey = "n5"
         if (!state.roadmapCompleted || typeof state.roadmapCompleted !== "object") state.roadmapCompleted = {}
         const prev = state.roadmapCompleted[levelKey] && typeof state.roadmapCompleted[levelKey] === "object"
@@ -981,6 +1013,22 @@
         const changed = prevKeys.length !== nextKeys.length || nextKeys.some((key) => !prev[key])
         state.roadmapCompleted[levelKey] = next
         return changed
+      }
+
+      function questionLevelKey(q) {
+        if (!q || typeof q !== "object") return state.levelKey
+        const refLevelKey = q?.vocabRef?.levelKey
+        if (refLevelKey) return refLevelKey
+        const id = String(q.id || "")
+        const match = id.match(/^([^-]+)-/)
+        return match?.[1] || state.levelKey
+      }
+
+      function activeSessionPreviewXp() {
+        if (state.screen !== "quiz") return 0
+        if (state.mode !== "normal") return 0
+        if (!state.sessionQuestions.length || state.lastResult) return 0
+        return Math.max(0, Number(state.sessionEarnedXp) || 0)
       }
 
       function trackVocabProgressFromAnswer(q, isCorrect) {
@@ -1016,8 +1064,8 @@
       }
 
       function levelProgressData() {
-        const xp = state.profile.totalXp
-        const level = state.profile.level
+        const xp = (Number(state.profile.totalXp) || 0) + activeSessionPreviewXp()
+        const level = levelFromXp(xp)
         const minXp = profileMinXpForLevel(level)
         const nextXp = profileNextXpTarget(level)
         const pct = nextXp ? Math.round(((xp - minXp) / Math.max(1, nextXp - minXp)) * 100) : 100
@@ -1050,7 +1098,9 @@
 
       function learningAchievements() {
         const result = state.lastResult || getResultMetrics()
-        const accuracy = result.accuracy || 0
+        const accuracy = shouldTrackSessionProgression()
+          ? (result.accuracy || 0)
+          : (state.profile.bestAccuracy || 0)
         const xp = state.profile.totalXp
         const streak = state.profile.streak
         const sessionsPlayed = state.profile.sessionsPlayed
@@ -1259,9 +1309,10 @@
 
       function renderTopbar() {
         const progress = levelProgressData()
+        const displayedXp = (Number(state.profile.totalXp) || 0) + activeSessionPreviewXp()
         topbarActions.innerHTML = `
           <div class="top-chip"><span>🔥</span><strong>${formatNumber(state.profile.streak)}</strong><span>day streak</span></div>
-          <div class="top-chip"><span>⭐</span><strong>${formatNumber(state.profile.totalXp)}</strong><span>XP</span></div>
+          <div class="top-chip"><span>⭐</span><strong>${formatNumber(displayedXp)}</strong><span>XP</span></div>
           <div class="top-chip top-chip--accent"><span>${currentLevel().label}</span><strong>Level ${progress.level}</strong></div>
         `
       }
@@ -1908,7 +1959,11 @@
       function completeSessionIfNeeded() {
         const result = getResultMetrics()
         state.lastResult = result
-        registerSession(state.profile, result.accuracy)
+        if (state.mode !== "reviewWrong" && state.sessionEarnedXp) {
+          const xpChanged = addXp(state.profile, state.sessionEarnedXp)
+          if (xpChanged) syncN5RoadmapCompletionFromXp()
+        }
+        if (shouldTrackSessionProgression()) registerSession(state.profile, result.accuracy)
         state.sessionEarnedXp = 0
         persistProgress()
       }
@@ -1917,11 +1972,8 @@
         if (state.mode !== "normal") return false
         if (!state.sessionQuestions.length || state.lastResult) return false
         if (!state.sessionEarnedXp) return false
-        const xpChanged = addXp(state.profile, -state.sessionEarnedXp)
         state.sessionEarnedXp = 0
-        const roadmapChanged = syncN5RoadmapCompletionFromXp()
-        if (xpChanged || roadmapChanged) persistProgress()
-        return xpChanged || roadmapChanged
+        return true
       }
 
       function resetGame() {
@@ -1977,6 +2029,15 @@
         render()
       }
 
+      function restartSession() {
+        if (state.mode === "reviewWrong") {
+          startWrongReview()
+          return
+        }
+        rollbackActiveSessionXp()
+        startGame()
+      }
+
       function goToScreen(screen) {
         if (screen === "quiz" && !state.sessionQuestions.length) {
           state.screen = "quiz"
@@ -2003,12 +2064,7 @@
         if (isCorrect) {
           state.score += POINTS_PER_CORRECT
           if (state.mode !== "reviewWrong") {
-            const xpChanged = addXp(state.profile, POINTS_PER_CORRECT)
-            if (xpChanged) {
-              state.sessionEarnedXp += POINTS_PER_CORRECT
-              syncN5RoadmapCompletionFromXp()
-              shouldPersist = true
-            }
+            state.sessionEarnedXp += POINTS_PER_CORRECT
           }
         } else {
           recordWrong(q, selectedOpt?.text ?? "", correctText)
@@ -2064,8 +2120,7 @@
         }
 
         if (action === "restart") {
-          rollbackActiveSessionXp()
-          startGame()
+          restartSession()
           return
         }
 
