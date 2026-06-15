@@ -653,6 +653,16 @@
             { t: "しゅうまつに かぞくと こうえんで さくらを みました。 そのあと、ちかくの みせで おひるごはんを たべました。", q: "さくらを みたあと、なにを しましたか。", a: 1, choices: ["うちへ かえった", "おひるごはんを たべた", "びょういんへ いった"] }
           ]
         },
+        narabiBank: [
+          { s: "わたしは ＿＿ ＿＿ ★ ＿＿ います。", words: ["がっこう", "で", "べんきょうして", "に"], a: "べんきょうして", choices: ["がっこう", "べんきょうして", "で"] },
+          { s: "きのう ＿＿ ★ ＿＿ ＿＿ ました。", words: ["ともだちと", "えいがを", "みに", "いき"], a: "えいがを", choices: ["ともだちと", "えいがを", "みに"] },
+          { s: "あした ＿＿ ＿＿ ★ ＿＿ ください。", words: ["はやく", "おきて", "ください", "ね"], a: "おきて", choices: ["はやく", "おきて", "ね"] }
+        ],
+        synonymBank: [
+          { s: "わたしは デパートに つとめて います。", a: 2, choices: ["わたしは デパートで かいものを して います。", "わたしは デパートで さんぽを して います。", "わたしは デパートで しごとを して います。", "わたしは デパートで やすんで います。"] },
+          { s: "このほんは むずかしくない です。", a: 1, choices: ["このほんは たかい です。", "このほんは かんたん です。", "このほんは おもい です。", "このほんは ふるい です。"] }
+        ]
+        },
         n4: {
           label: "N4",
           locked: false,
@@ -939,6 +949,39 @@
         }
       }
 
+      function makeNarabiQuestion(levelKey, entry, index) {
+        const letters = ["A", "B", "C"]
+        const opts = shuffle(entry.choices).slice(0, 3)
+        const options = opts.map((t, i) => ({ id: letters[i], text: t }))
+        const correctOptionId = options.find((o) => o.text === entry.a)?.id ?? "A"
+        return {
+          id: `${levelKey}-narabi-${String(index + 1).padStart(4, "0")}`,
+          type: "narabi",
+          typeLabel: "ならびかえ / Urutan Kata",
+          prompt: { primary: entry.s, secondary: "Susun kata yang tepat untuk posisi ★" },
+          questionText: "★ に はいる ことばは どれですか。",
+          questionSub: "Pilih kata yang paling tepat untuk posisi bintang.",
+          options,
+          correctOptionId,
+          feedbackCorrect: entry.a
+        }
+      }
+      function makeSynonymQuestion(levelKey, entry, index) {
+        const letters = ["A", "B", "C", "D"]
+        const options = entry.choices.map((t, i) => ({ id: letters[i], text: t }))
+        const correctOptionId = letters[entry.a]
+        return {
+          id: `${levelKey}-synonym-${String(index + 1).padStart(4, "0")}`,
+          type: "synonym",
+          typeLabel: "いみ / Sinonim",
+          prompt: { primary: entry.s, secondary: "Cari kalimat yang artinya sama" },
+          questionText: "＿＿＿＿ の ぶんと だいたい おなじ いみの ぶんは どれですか。",
+          questionSub: "Pilih kalimat yang memiliki arti paling mirip.",
+          options,
+          correctOptionId,
+          feedbackCorrect: entry.choices[entry.a]
+        }
+      }
       function buildQuestionPool(levelKey) {
         const level = levels[levelKey]
         const pool = []
@@ -954,6 +997,16 @@
         }
         for (let i = 0; i < level.storyBank.length; i += 1) {
           pool.push(makeStoryQuestion(levelKey, level.storyBank[i], pool.length))
+        }
+        if (level.narabiBank) {
+          for (let i = 0; i < level.narabiBank.length; i += 1) {
+            pool.push(makeNarabiQuestion(levelKey, level.narabiBank[i], pool.length))
+          }
+        }
+        if (level.synonymBank) {
+          for (let i = 0; i < level.synonymBank.length; i += 1) {
+            pool.push(makeSynonymQuestion(levelKey, level.synonymBank[i], pool.length))
+          }
         }
         return pool
       }
