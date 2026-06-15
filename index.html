@@ -1921,6 +1921,24 @@
         `
       }
 
+      function syncN5RoadmapCompletionFromXp() {
+        const milestones = n5RoadmapMilestones()
+        const xp = state.profile.totalXp
+        const levelKey = "n5"
+        if (!state.roadmapCompleted || typeof state.roadmapCompleted !== "object") state.roadmapCompleted = {}
+        if (!state.roadmapCompleted[levelKey] || typeof state.roadmapCompleted[levelKey] !== "object") {
+          state.roadmapCompleted[levelKey] = {}
+        }
+        const map = state.roadmapCompleted[levelKey]
+        let changed = false
+        for (let i = 0; i < milestones.length; i += 1) {
+          if (xp >= milestones[i].targetXp && !map[String(i)]) {
+            map[String(i)] = true
+            changed = true
+          }
+        }
+        return changed
+      }
       function render() {
         renderTopbar()
         renderSidebar()
