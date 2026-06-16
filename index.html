@@ -1068,7 +1068,9 @@
       function buildQuestionPool(levelKey) {
         const level = levels[levelKey]
         const pool = []
-        for (let i = 0; i < level.vocab.length; i += 1) {
+        const vocabLimit = (levelKey === "n4" || levelKey === "n3") ? 30 : level.vocab.length
+        const vocabIndices = shuffle([...Array(level.vocab.length).keys()]).slice(0, vocabLimit)
+        for (let vi = 0; vi < vocabIndices.length; vi += 1) { const i = vocabIndices[vi]
           pool.push(makeReadingQuestion(levelKey, level.vocab[i], i, pool.length))
           pool.push(makeKanjiQuestion(levelKey, level.vocab[i], i, pool.length))
         }
