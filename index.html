@@ -1011,21 +1011,40 @@
       }
 
       function makeNarabiQuestion(levelKey, entry, index) {
-        const letters = ["A", "B", "C"]
+
+        const numbers = ["1", "2", "3", "4"]
+        const shuffledWords = shuffle(entry.words)
+        const wordDisplay = shuffledWords.map((w, i) => `${i + 1} ${w}`).join("　　")
+        const correctIndex = shuffledWords.indexOf(entry.a) + 1
         const opts = shuffle(entry.choices).slice(0, 3)
+        const letters = ["A", "B", "C"]
         const options = opts.map((t, i) => ({ id: letters[i], text: t }))
         const correctOptionId = options.find((o) => o.text === entry.a)?.id ?? "A"
         return {
           id: `${levelKey}-narabi-${String(index + 1).padStart(4, "0")}`,
           type: "narabi",
           typeLabel: "ならびかえ / Urutan Kata",
-          prompt: { primary: entry.s, secondary: "Susun kata yang tepat untuk posisi ★" },
+          prompt: { primary: entry.s, secondary: wordDisplay },
           questionText: "★ に はいる ことばは どれですか。",
-          questionSub: "Pilih kata yang paling tepat untuk posisi bintang.",
+          questionSub: `ただしい ぶんを つくります。 ★ に はいる ばんごうを えらんでください。`,
           options,
           correctOptionId,
           feedbackCorrect: entry.a
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       }
       function makeSynonymQuestion(levelKey, entry, index) {
         const letters = ["A", "B", "C", "D"]
