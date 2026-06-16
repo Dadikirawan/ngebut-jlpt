@@ -1015,9 +1015,8 @@
         const numbers = ["1", "2", "3", "4"]
         const shuffledWords = shuffle(entry.words)
         const wordDisplay = shuffledWords.map((w, i) => `${i + 1} ${w}`).join("　　")
-        const correctIndex = shuffledWords.indexOf(entry.a) + 1
-        const opts = shuffle(entry.choices).slice(0, 3)
-        const letters = ["A", "B", "C"]
+        const opts = shuffle(entry.words).slice(0, 4)
+        const letters = ["A", "B", "C", "D"]
         const options = opts.map((t, i) => ({ id: letters[i], text: t }))
         const correctOptionId = options.find((o) => o.text === entry.a)?.id ?? "A"
         return {
