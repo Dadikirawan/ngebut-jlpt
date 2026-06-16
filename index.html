@@ -1080,14 +1080,17 @@
         }
         for (let i = 0; i < level.storyBank.length; i += 1) {
           pool.push(makeStoryQuestion(levelKey, level.storyBank[i], pool.length))
+          pool.push(makeStoryQuestion(levelKey, level.storyBank[i], pool.length))
         }
         if (level.narabiBank) {
           for (let i = 0; i < level.narabiBank.length; i += 1) {
+            pool.push(makeNarabiQuestion(levelKey, level.narabiBank[i], pool.length))
             pool.push(makeNarabiQuestion(levelKey, level.narabiBank[i], pool.length))
           }
         }
         if (level.synonymBank) {
           for (let i = 0; i < level.synonymBank.length; i += 1) {
+            pool.push(makeSynonymQuestion(levelKey, level.synonymBank[i], pool.length))
             pool.push(makeSynonymQuestion(levelKey, level.synonymBank[i], pool.length))
           }
         }
