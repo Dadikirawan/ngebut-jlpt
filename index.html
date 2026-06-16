@@ -1011,24 +1011,28 @@
       }
 
       function makeNarabiQuestion(levelKey, entry, index) {
-
-        const numbers = ["1", "2", "3", "4"]
-        const shuffledWords = shuffle(entry.words)
-        const wordDisplay = shuffledWords.map((w, i) => `${i + 1} ${w}`).join("　　")
-        const opts = shuffle(entry.words).slice(0, 4)
+        const shuffledWords = shuffle([...entry.words])
+        const starPos = shuffledWords.indexOf(entry.a)
+        const wordDisplay = shuffledWords.map((w, i) => `${i + 1}  ${w}`).join("　　")
+        const slotDisplay = shuffledWords.map((w, i) => {
+          if (i === starPos) return `★`
+          return `＿${i + 1}＿`
+        }).join("　")
+        const promptText = entry.s.replace(/＿＿ ★ ＿＿ ＿＿|＿＿ ＿＿ ★ ＿＿|＿＿ ★ ＿＿|★/, slotDisplay)
+        const correctNumber = String(starPos + 1)
         const letters = ["A", "B", "C", "D"]
-        const options = opts.map((t, i) => ({ id: letters[i], text: t }))
-        const correctOptionId = options.find((o) => o.text === entry.a)?.id ?? "A"
+        const options = shuffledWords.map((w, i) => ({ id: letters[i], text: String(i + 1) }))
+        const correctOptionId = letters[starPos]
         return {
           id: `${levelKey}-narabi-${String(index + 1).padStart(4, "0")}`,
           type: "narabi",
           typeLabel: "ならびかえ / Urutan Kata",
-          prompt: { primary: entry.s, secondary: wordDisplay },
+          prompt: { primary: promptText, secondary: wordDisplay },
           questionText: "★ に はいる ことばは どれですか。",
-          questionSub: `ただしい ぶんを つくります。 ★ に はいる ばんごうを えらんでください。`,
+          questionSub: "ただしい ぶんを つくります。 ★ に はいる ばんごうを えらんでください。",
           options,
           correctOptionId,
-          feedbackCorrect: entry.a
+          feedbackCorrect: correctNumber
         }
 
 
