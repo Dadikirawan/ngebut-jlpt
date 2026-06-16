@@ -1013,28 +1013,25 @@
       function makeNarabiQuestion(levelKey, entry, index) {
         const shuffledWords = shuffle([...entry.words])
         const starPos = shuffledWords.indexOf(entry.a)
-        const wordDisplay = shuffledWords.map((w, i) => `${i + 1}  ${w}`).join("　　")
         const slotDisplay = shuffledWords.map((w, i) => {
-          if (i === starPos) return `★`
-          return `＿${i + 1}＿`
+          if (i === starPos) return "★"
+          return "＿＿"
         }).join("　")
         const promptText = entry.s.replace(/＿＿ ★ ＿＿ ＿＿|＿＿ ＿＿ ★ ＿＿|＿＿ ★ ＿＿|★/, slotDisplay)
-        const correctNumber = String(starPos + 1)
         const letters = ["A", "B", "C", "D"]
-        const options = shuffledWords.map((w, i) => ({ id: letters[i], text: String(i + 1) }))
+        const options = shuffledWords.map((w, i) => ({ id: letters[i], text: w }))
         const correctOptionId = letters[starPos]
         return {
           id: `${levelKey}-narabi-${String(index + 1).padStart(4, "0")}`,
           type: "narabi",
           typeLabel: "ならびかえ / Urutan Kata",
-          prompt: { primary: promptText, secondary: wordDisplay },
+          prompt: { primary: promptText, secondary: "ただしい ぶんを つくります。" },
           questionText: "★ に はいる ことばは どれですか。",
-          questionSub: "ただしい ぶんを つくります。 ★ に はいる ばんごうを えらんでください。",
+          questionSub: "Pilih kata yang paling tepat untuk posisi ★.",
           options,
           correctOptionId,
-          feedbackCorrect: correctNumber
+          feedbackCorrect: entry.a
         }
-
 
 
 
