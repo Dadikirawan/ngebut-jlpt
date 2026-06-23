@@ -1014,16 +1014,11 @@
       }
 
       function makeNarabiQuestion(levelKey, entry, index) {
-        const shuffledWords = shuffle([...entry.words])
-        const starPos = shuffledWords.indexOf(entry.a)
-        const slotDisplay = shuffledWords.map((w, i) => {
-          if (i === starPos) return "★"
-          return "＿＿"
-        }).join("　")
-        const promptText = entry.s.replace(/＿＿ ★ ＿＿ ＿＿|＿＿ ＿＿ ★ ＿＿|＿＿ ★ ＿＿|★/, slotDisplay)
         const letters = ["A", "B", "C", "D"]
+        const shuffledWords = shuffle([...entry.words])
+        const correctOptionId = letters[shuffledWords.indexOf(entry.a)]
+        const promptText = entry.s
         const options = shuffledWords.map((w, i) => ({ id: letters[i], text: w }))
-        const correctOptionId = letters[starPos]
         return {
           id: `${levelKey}-narabi-${String(index + 1).padStart(4, "0")}`,
           type: "narabi",
