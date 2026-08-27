@@ -61,6 +61,7 @@
           description: "Pilih level, lihat target XP, dan mulai sesi yang terasa seperti produk edukasi modern dengan alur belajar yang jelas.",
           actions: [
             { label: "Mulai Sesi", action: "start", variant: "primary" },
+            { label: "Latihan per Kategori", action: "navigate", screen: "categories", variant: "secondary" },
             { label: "Lihat Vocabulary", action: "navigate", screen: "vocabulary", variant: "secondary" }
           ]
         },
@@ -107,6 +108,15 @@
           actions: [
             { label: "Mulai Sesi Baru", action: "start", variant: "primary" },
             { label: "Buka Vocabulary", action: "navigate", screen: "vocabulary", variant: "ghost" }
+          ]
+        },
+        categories: {
+          eyebrow: "Latihan per Kategori",
+          title: "Pilih tipe soal yang mau kamu latih.",
+          description: "Fokus ke satu tipe soal dulu, atau coba satu bagian spesifik biar progres kamu lebih terarah.",
+          actions: [
+            { label: "Mulai Sesi Acak", action: "start", variant: "secondary" },
+            { label: "Kembali Home", action: "navigate", screen: "home", variant: "ghost" }
           ]
         }
       }
@@ -541,6 +551,17 @@
 
       function buildAnswerExplanation(q, correctText) {
         const correctAnswer = String(correctText || "")
+
+        if (q?.type === "official") {
+          return {
+            correctAnswer,
+            romaji: "",
+            meaningId: "",
+            exampleJp: q?.prompt?.primary || "",
+            exampleId: q?.explanationText || ""
+          }
+        }
+
         const kana = extractKanaFromCorrectText(correctAnswer)
         const romaji = kana ? kanaToRomaji(kana) : ""
         const meaningId = ANSWER_MEANING_ID[kana] ?? ""
@@ -590,6 +611,158 @@
             "食べる|たべる","飲む|のむ","行く|いく","来る|くる","見る|みる","読む|よむ","書く|かく","大きい|おおきい","小さい|ちいさい","高い|たかい","安い|やすい","難しい|むずかしい","悪い|わるい","早い|はやい","遅い|おそい","新しい|あたらしい","古い|ふるい","白い|しろい","黒い|くろい","赤い|あかい","青い|あおい","名前|なまえ","日本|にほん","今|いま","今日|きょう","明日|あした","昨日|きのう","毎日|まいにち","時間|じかん","駅|えき","店|みせ","道|みち","公園|こうえん","病院|びょういん","日本語|にほんご","電話|でんわ","仕事|しごと","会社|かいしゃ","休み|やすみ","天気|てんき","雨|あめ","雪|ゆき","風|かぜ","山|やま","川|かわ","海|うみ","朝|あさ","昼|ひる","夜|よる","毎週|まいしゅう","月曜日|げつようび","火曜日|かようび","水曜日|すいようび","木曜日|もくようび","金曜日|きんようび","土曜日|どようび","日曜日|にちようび","一つ|ひとつ","二つ|ふたつ","三つ|みっつ","四つ|よっつ","五つ|いつつ","六つ|むっつ","七つ|ななつ","八つ|やっつ","九つ|ここのつ","十|じゅう",
             "手|て","足|あし","目|め","耳|みみ","口|くち","頭|あたま","体|からだ","歩く|あるく","走る|はしる","買う|かう","売る|うる","会う|あう","話す|はなす","聞く|きく","待つ|まつ","入る|はいる","出る|でる","上|うえ","下|した","右|みぎ","左|ひだり","前|まえ","後ろ|うしろ"
           ]),
+          officialBank: [
+            { q: `<u>今日</u>は天気がいいです。`, choices: [`こんにち`, `きょう`, `こんじつ`, `きょうじつ`], a: 1, explanation: `今日 dibaca 'きょう' yang berarti 'hari ini'. 'こんにち' hanya dipakai dalam kata majemuk seperti こんにちは (salam 'halo'), sedangkan 'こんじつ' dan 'きょうじつ' bukan cara baca yang benar untuk kata ini.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `わたしの<u>誕生日</u>は三月です。`, choices: [`たんじょうひ`, `だんじょうび`, `たんじょうび`, `たんしょうび`], a: 2, explanation: `誕生日 dibaca 'たんじょうび' (tanggal lahir). Opsi lain salah karena kesalahan kecil pada bunyi: たんじょうひ (harusnya び bukan ひ), だんじょうび (harusnya た bukan だ), たんしょうび (harusnya じょう bukan しょう).`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `<u>毎朝</u>六時に起きます。`, choices: [`まいちょう`, `めいあさ`, `まいじょう`, `まいあさ`], a: 3, explanation: `毎朝 dibaca 'まいあさ' yang berarti 'setiap pagi'. 毎 dibaca 'まい' dan 朝 dibaca 'あさ' saat berdiri sendiri seperti ini, bukan 'ちょう' atau 'じょう'.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `この<u>荷物</u>はとても重いです。`, choices: [`にもつ`, `がもつ`, `にぶつ`, `かもつ`], a: 0, explanation: `荷物 dibaca 'にもつ' yang berarti 'barang bawaan'. がもつ, にぶつ, dan かもつ bukan cara baca yang tepat untuk kata ini (かもつ sebenarnya adalah cara baca 貨物 'barang kargo', bukan 荷物).`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `<u>来週</u>友達と旅行します。`, choices: [`らいしゅう`, `らいじゅう`, `きしゅう`, `らいしゅ`], a: 0, explanation: `来週 dibaca 'らいしゅう' yang berarti 'minggu depan'. 週 selalu dibaca 'しゅう' (bukan じゅう) pada kata ini, jadi らいじゅう dan らいしゅ salah.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `駅の<u>近く</u>にスーパーがあります。`, choices: [`ちかい`, `こんく`, `ちかく`, `きんく`], a: 2, explanation: `近く (kata benda/keterangan tempat 'di dekat') dibaca 'ちかく'. 'ちかい' adalah bentuk kata sifat 'dekat' (今日は近い日です), bukan bentuk yang dipakai di sini.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `<u>兄</u>は銀行で働いています。`, choices: [`けい`, `あにき`, `きょう`, `あに`], a: 3, explanation: `兄 (kakak laki-laki, dipakai saat membicarakan kakak sendiri ke orang lain) dibaca 'あに'. 'あにき' adalah sebutan informal/akrab, sedangkan 'けい' dan 'きょう' bukan cara baca yang benar di sini.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `この問題は<u>難しい</u>です。`, choices: [`むつかしい`, `むずかしい`, `むづかしい`, `むずがしい`], a: 1, explanation: `難しい dibaca 'むずかしい' (sulit). Perhatikan huruf 'ず' (bukan つ, づ, atau が) — ini kesalahan ejaan umum yang sering diujikan.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `今日は<u>一日中</u>雨でした。`, choices: [`いちにちちゅう`, `いちじつちゅう`, `ついたちじゅう`, `いちにちじゅう`], a: 3, explanation: `一日中 dibaca 'いちにちじゅう' yang berarti 'sepanjang hari'. Akhiran 中 di sini dibaca 'じゅう' (bukan ちゅう) karena menunjukkan durasi penuh.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `父は<u>病院</u>で働いています。`, choices: [`びょういん`, `びよういん`, `ひょういん`, `びょうき`], a: 0, explanation: `病院 (rumah sakit) dibaca 'びょういん'. 'びよういん' adalah 美容院 (salon kecantikan) — homofon yang mirip tapi beda kanji, 'びょうき' berarti 'sakit/penyakit' (kata berbeda).`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `<u>夕方</u>から雨が降るでしょう。`, choices: [`ゆうほう`, `ゆうがた`, `せきかた`, `ゆがた`], a: 1, explanation: `夕方 dibaca 'ゆうがた' yang berarti 'sore hari'. Opsi lain merupakan gabungan bunyi yang tidak sesuai dengan kanji ini.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `この道を<u>右</u>に曲がってください。`, choices: [`う`, `ゆう`, `みぎ`, `みき`], a: 2, explanation: `右 (kanan) dibaca 'みぎ'. 'みき' hampir mirip tapi salah huruf terakhir (harus konsonan 'g' bukan 'k').`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `<u>地下鉄</u>で会社へ行きます。`, choices: [`じかてつ`, `ちがてつ`, `ちかてつ`, `ちかてづ`], a: 2, explanation: `地下鉄 (kereta bawah tanah/subway) dibaca 'ちかてつ'. 地 dibaca 'ち' (bukan じ), 下 dibaca 'か' (bukan が), dan 鉄 dibaca 'てつ' (bukan てづ).`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `彼女は<u>有名</u>な歌手です。`, choices: [`ゆうめい`, `ゆめい`, `ゆうみょう`, `ゆうめん`], a: 0, explanation: `有名 (terkenal) dibaca 'ゆうめい'. 名 di kata ini dibaca 'めい' bukan 'みょう' atau 'めん'.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `<u>今夜</u>は早く寝ます。`, choices: [`いまや`, `きんや`, `こんよる`, `こんや`], a: 3, explanation: `今夜 (malam ini) dibaca 'こんや'. 夜 di sini dibaca 'や' bukan 'よる' karena bergabung dengan 今 (こん).`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `駅前に新しい<u>建物</u>ができました。`, choices: [`けんもつ`, `たてもの`, `たてぶつ`, `けんぶつ`], a: 1, explanation: `建物 (bangunan) dibaca 'たてもの'. 'けんぶつ' berarti 'melihat-lihat/tamasya' (見物), sebuah kata yang sama sekali berbeda meski kanjinya beda juga.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `<u>妹</u>はまだ小学生です。`, choices: [`いもうと`, `まい`, `いもおと`, `いもうとお`], a: 0, explanation: `妹 (adik perempuan) dibaca 'いもうと'. Perhatikan ejaan vokal panjangnya: bukan 'いもおと' atau 'いもうとお'.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `この箱は<u>軽い</u>ので一人で運べます。`, choices: [`けいい`, `かるいい`, `かるい`, `かろい`], a: 2, explanation: `軽い (ringan) dibaca 'かるい'. Opsi lain adalah kesalahan ejaan (かるいい kelebihan huruf, かろい salah vokal).`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `卒業<u>試験</u>は来月です。`, choices: [`しいけん`, `しげん`, `じけん`, `しけん`], a: 3, explanation: `試験 (ujian) dibaca 'しけん'. 'じけん' berarti 'kejadian/insiden' (事件), kata yang berbeda arti sama sekali.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `会議は<u>午後</u>三時から始まります。`, choices: [`こうご`, `ごご`, `ごこ`, `ごほう`], a: 1, explanation: `午後 (siang/sore, setelah tengah hari) dibaca 'ごご'. Ini salah satu kata yang paling sering keliru diucapkan pemula, pastikan hafal 'ごご' bukan 'こうご'.`, passage: ``, sectionLabel: `文字・語彙 · Cara Baca Kanji`, problemNumber: 1 },
+            { q: `らいしゅう <u>りょこう</u>に いきます。`, choices: [`族行`, `旅航`, `旅衍`, `旅行`], a: 3, explanation: `'りょこう' (bepergian/wisata) ditulis 旅行. 旅 = perjalanan, 行 = pergi. Opsi lain memakai kanji yang salah atau tidak ada gabungan katanya.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `この <u>みせ</u>は やすくて おいしいです。`, choices: [`占`, `床`, `店`, `庄`], a: 2, explanation: `'みせ' (toko) ditulis 店. 占 (占う=meramal), 床 (lantai), dan 庄 bukan kanji untuk 'toko'.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `<u>でんしゃ</u>の なかで ほんを よみます。`, choices: [`電軍`, `電車`, `雷車`, `電東`], a: 1, explanation: `'でんしゃ' (kereta listrik) ditulis 電車. 電 (listrik) sering tertukar dengan 雷 (petir) karena bentuknya mirip — perhatikan baik-baik.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `まいにち <u>こうえん</u>を さんぽします。`, choices: [`公園`, `広園`, `工園`, `公演`], a: 0, explanation: `'こうえん' (taman) ditulis 公園. 公演 (こうえん juga tapi beda kanji) berarti 'pertunjukan', jadi harus hati-hati membedakan konteks.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `きのうは <u>あめ</u>でした。`, choices: [`雪`, `雨`, `雲`, `雫`], a: 1, explanation: `'あめ' (hujan) ditulis 雨. 雪 = salju (ゆき), 雲 = awan (くも), 雫 = tetesan (しずく).`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `この <u>えいが</u>は とても おもしろいです。`, choices: [`映書`, `栄画`, `英画`, `映画`], a: 3, explanation: `'えいが' (film) ditulis 映画. Pastikan tidak tertukar dengan gabungan kanji lain yang mirip bunyi/bentuknya.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `たんじょうびに <u>ケーキ</u>を たべます。`, choices: [`ケーキ`, `ゲーキ`, `ケーギ`, `ケイキ`], a: 0, explanation: `'kue/cake' ditulis dalam katakana ケーキ dengan tanda panjang (ー), bukan ゲーキ/ケーギ (huruf dakuten salah tempat) atau ケイキ (tanpa tanda panjang).`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `きょうしつに <u>がくせい</u>が じゅうにん います。`, choices: [`字生`, `学正`, `学生`, `学青`], a: 2, explanation: `'がくせい' (siswa/mahasiswa) ditulis 学生. Opsi lain menggunakan kanji mirip bentuk tapi salah (字, 正, 青).`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `<u>でぱーと</u>で あたらしい くつを かいました。`, choices: [`デパート`, `デパード`, `デパト`, `テパート`], a: 0, explanation: `'department store' ditulis デパート. Perhatikan huruf ド (dengan dakuten) dan tanda panjang ー yang tepat posisinya.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `<u>びょういん</u>へ いって くすりを もらいました。`, choices: [`病員`, `病完`, `病院`, `痛院`], a: 2, explanation: `'びょういん' (rumah sakit) ditulis 病院. 病員/病完/痛院 bukan kata yang benar.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `まいあさ <u>しんぶん</u>を よみます。`, choices: [`親聞`, `新聞`, `新問`, `新文`], a: 1, explanation: `'しんぶん' (koran) ditulis 新聞. 新 = baru, 聞 = mendengar/berita.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `<u>そら</u>が きれいな いろに なりました。`, choices: [`穴`, `室`, `究`, `空`], a: 3, explanation: `'そら' (langit) ditulis 空. Opsi lain (穴=lubang, 室=ruangan, 究=meneliti) tidak berkaitan.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `らいねん <u>だいがく</u>に はいります。`, choices: [`太学`, `大学`, `大字`, `大楽`], a: 1, explanation: `'だいがく' (universitas) ditulis 大学. 大 = besar, 学 = belajar/ilmu.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `<u>でんわ</u>ばんごうを おしえて ください。`, choices: [`電語`, `雷話`, `電話`, `電活`], a: 2, explanation: `'でんわ' (telepon) ditulis 電話. 電 = listrik, 話 = bicara. Awas jangan tertukar dengan 雷 (petir).`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `けさは <u>さむかった</u>です。`, choices: [`実かった`, `寒がった`, `塞かった`, `寒かった`], a: 3, explanation: `'さむかった' (dingin, bentuk lampau) ditulis 寒かった. 実 dan 塞 kanjinya mirip 寒 tapi salah, dan 寒がった salah karena harusnya かった bukan がった.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `にほんごの <u>しけん</u>を うけます。`, choices: [`試験`, `詩験`, `式験`, `試検`], a: 0, explanation: `'しけん' (ujian) ditulis 試験. Opsi lain menggunakan kanji mirip bentuk (詩=puisi, 式=upacara/rumus, 検 salah pasangan kanji).`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `この <u>みち</u>を まっすぐ いって ください。`, choices: [`導`, `首`, `通`, `道`], a: 3, explanation: `'みち' (jalan) ditulis 道. 導 (membimbing), 首 (leher), 通 (melewati) adalah kanji lain yang mirip tapi tidak tepat di sini.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `<u>らじお</u>で にゅーすを ききます。`, choices: [`ラジォ`, `ラジヲ`, `ラジオ`, `ラヅオ`], a: 2, explanation: `'radio' ditulis ラジオ dengan katakana オ ukuran normal (bukan ォ kecil) dan huruf ジ (bukan ヅ).`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `あにの しごとは <u>いしゃ</u>です。`, choices: [`医院`, `医者`, `医社`, `矢者`], a: 1, explanation: `'いしゃ' (dokter) ditulis 医者. 医院 berarti 'klinik' (tempat, bukan orang), jadi meski mirip, artinya berbeda.`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `きょうは <u>かぞく</u>と しょくじします。`, choices: [`家族`, `家属`, `加族`, `家俗`], a: 0, explanation: `'かぞく' (keluarga) ditulis 家族. Opsi lain memakai kanji mirip bentuk tapi salah (属, 加, 俗).`, passage: ``, sectionLabel: `文字・語彙 · Penulisan Kanji`, problemNumber: 2 },
+            { q: `毎朝、コーヒーを（　）飲みます。`, choices: [`一冊`, `一台`, `一枚`, `一杯`], a: 3, explanation: `Untuk menghitung 'segelas/secangkir' minuman digunakan satuan 杯 (はい), jadi 一杯 (secangkir kopi). 一冊 untuk buku, 一台 untuk mesin/kendaraan, 一枚 untuk benda tipis/lembaran.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `教室の中は（　）静かでした。`, choices: [`あまり`, `ぜんぜん`, `とても`, `たぶん`], a: 2, explanation: `Kalimat ini positif (静かでした = tenang), jadi kata keterangan yang cocok adalah とても (sangat). あまり dan ぜんぜん biasanya dipasangkan dengan bentuk negatif (静かではなかった), dan たぶん (mungkin) tidak sesuai konteks kepastian ini.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `電車が（　）来ないので、遅刻しました。`, choices: [`なかなか`, `もう`, `きっと`, `だんだん`], a: 0, explanation: `なかなか来ない berarti 'tak kunjung datang, sudah ditunggu lama tapi belum juga'. もう (sudah), きっと (pasti), だんだん (lambat laun) tidak cocok pada konteks penantian yang lama ini.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `この本を（　）ください。すぐ返します。`, choices: [`あげて`, `貸して`, `返して`, `借りて`], a: 1, explanation: `Karena pembicara meminta buku dari lawan bicara dan berjanji akan segera mengembalikannya, kata yang tepat adalah 貸して (pinjamkan, dari sudut pandang si pemberi pinjaman). 借りて berarti 'meminjam' tapi bentuknya tidak pas untuk permintaan langsung di sini, あげて (memberi) dan 返して (mengembalikan) tidak sesuai makna.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `台風で電車が（　）、会社に行けませんでした。`, choices: [`止まって`, `走って`, `着いて`, `動いて`], a: 0, explanation: `Karena topan menyebabkan tidak bisa berangkat kerja, keretanya pasti 止まって (berhenti beroperasi). 走って (berjalan/berlari), 着いて (tiba), 動いて (bergerak) tidak sesuai konteks gangguan tersebut.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `テストの前に、教科書を（　）復習しました。`, choices: [`まだ`, `もうすぐ`, `もっと`, `もう一度`], a: 3, explanation: `もう一度 berarti 'sekali lagi', cocok untuk konteks meninjau ulang buku pelajaran sebelum tes. まだ (masih belum), もうすぐ (sebentar lagi), もっと (lebih) tidak pas di sini.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `彼は日本語が（　）上手です。`, choices: [`すこし`, `ぜんぜん`, `とても`, `あまり`], a: 2, explanation: `上手です (mahir) adalah pernyataan positif, jadi keterangan yang cocok adalah とても (sangat). ぜんぜん dan あまり memerlukan bentuk negatif, すこし kurang natural dengan 上手.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `この道は狭いので、車が（　）通れません。`, choices: [`一台に`, `一台しか`, `一台まで`, `一台も`], a: 1, explanation: `Pola '～しか～ません' berarti 'hanya... yang bisa' (dengan makna terbatas). 一台しか通れません = 'hanya satu mobil yang bisa lewat'. Opsi lain tidak membentuk pola gramatikal yang benar dengan ～ません.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `冷蔵庫に卵が（　）しか　残っていません。`, choices: [`二回`, `二人`, `二冊`, `二つ`], a: 3, explanation: `Telur adalah benda bulat/kecil yang dihitung dengan satuan つ, jadi 二つ (dua butir). 二回 (dua kali/frekuensi), 二人 (dua orang), 二冊 (dua buku) tidak sesuai untuk telur.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `友達に手紙を（　）、返事を待っています。`, choices: [`出て`, `出して`, `出られて`, `出させて`], a: 1, explanation: `手紙を出す berarti 'mengirim surat'. Bentuk te-nya adalah 出して, sehingga kalimatnya berarti 'setelah mengirim surat ke teman, sedang menunggu balasannya'. Bentuk lain (自動詞 出る, pasif 出られて, kausatif 出させて) tidak cocok dengan objek 手紙を.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `赤ちゃんが泣いているので、（　）抱きました。`, choices: [`やさしく`, `きびしく`, `はやく`, `うるさく`], a: 0, explanation: `Saat bayi menangis, wajar jika dipeluk dengan やさしく (lembut). きびしく (keras/tegas), うるさく (berisik) tidak cocok untuk tindakan menenangkan bayi.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `会議の資料は（　）用意しておきました。`, choices: [`これから`, `そろそろ`, `すでに`, `やっと`], a: 2, explanation: `すでに berarti 'sudah' (menunjukkan sesuatu telah selesai dipersiapkan sebelumnya). これから (mulai sekarang), そろそろ (sebentar lagi), やっと (akhirnya) tidak cocok dengan konteks persiapan yang sudah selesai.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `エアコンを（　）から寝ました。`, choices: [`つく`, `消えて`, `消して`, `つけて`], a: 2, explanation: `Sebelum tidur biasanya AC dimatikan, jadi 消して (mematikan, bentuk transitif dari 消す). つけて berarti 'menyalakan' yang kurang lazim sebelum tidur, つく dan 消えて adalah bentuk intransitif yang tidak cocok dengan objek エアコンを.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `駅まで歩いて（　）分くらいです。`, choices: [`十五年`, `十五`, `十五回`, `十五時`], a: 1, explanation: `Untuk menyatakan lama waktu dalam menit, cukup angka + 分 yang sudah tertulis setelah kurung, jadi hanya diperlukan angka '十五' (lima belas). 年 (tahun), 回 (kali), 時 (jam) tidak sesuai satuan menit yang dimaksud.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `この店のラーメンは（　）おいしいと評判です。`, choices: [`べつに`, `たまに`, `まさに`, `とくに`], a: 3, explanation: `とくに berarti 'terutama/khususnya', cocok untuk menekankan bahwa ramen di toko ini istimewa enaknya. べつに (tidak juga/khususnya jika negatif), たまに (kadang-kadang), まさに (benar-benar/persis) kurang pas di konteks pujian reputasi ini.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `彼女は毎日日記を（　）います。`, choices: [`かいて`, `つけて`, `つくって`, `よんで`], a: 1, explanation: `日記をつける adalah ungkapan tetap yang berarti 'menulis buku harian secara rutin'. Meski 書く (menulis) juga masuk akal secara harfiah, ungkapan baku dan alami untuk kebiasaan menulis diari adalah つける.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `この部分は問題（　）ところです。`, choices: [`がない`, `でない`, `がある`, `とある`], a: 2, explanation: `問題がある berarti 'ada masalah'. Kalimat ini menjelaskan bahwa bagian ini adalah bagian yang bermasalah, jadi 問題があるところ (bagian yang ada masalahnya). がない (tidak ada) berlawanan makna, でない dan とある tidak membentuk pola yang tepat.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `その部屋は暗いので、電気を（　）ください。`, choices: [`けして`, `つけて`, `とめて`, `しめて`], a: 1, explanation: `Karena ruangan gelap, wajar diminta untuk つけて (menyalakan) lampu. けして (mematikan) berlawanan makna, とめて (menghentikan) dan しめて (menutup) tidak cocok untuk 'lampu/listrik'.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `妹は人形で（　）遊んでいます。`, choices: [`ばかり`, `だけ`, `よく`, `しか`], a: 0, explanation: `～ばかり setelah kata benda + で menunjukkan 'selalu/hanya itu saja yang dilakukan', jadi 人形でばかり遊んでいます berarti 'selalu bermain boneka saja'. だけ dan しか memerlukan struktur partikel berbeda, よく (sering) kurang menekankan makna 'melulu' seperti konteksnya.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `宿題を忘れたので、先生に（　）ました。`, choices: [`たのまれ`, `よばれ`, `ほめられ`, `しかられ`], a: 3, explanation: `Karena lupa mengerjakan PR, wajar jika dimarahi guru: 叱られる (bentuk pasif dari 叱る = memarahi) → しかられました. たのまれ (diminta tolong), よばれ (dipanggil), ほめられ (dipuji) tidak sesuai dengan konteks kesalahan lupa PR.`, passage: ``, sectionLabel: `文字・語彙 · Pemilihan Kata sesuai Konteks`, problemNumber: 3 },
+            { q: `この部屋はきれいです。`, choices: [`この部屋は広いです。`, `この部屋は暗いです。`, `この部屋はにぎやかです。`, `この部屋はよごれていません。`], a: 3, explanation: `きれい di sini berarti 'bersih/rapi', yang maknanya sama dengan 'tidak kotor' → よごれていません. 広い (luas), 暗い (gelap), にぎやか (ramai) adalah makna yang berbeda dari 'bersih'.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `田中さんはひまです。`, choices: [`田中さんはいそがしいです。`, `田中さんはいそがしくないです。`, `田中さんはねむいです。`, `田中さんはうれしいです。`], a: 1, explanation: `ひま berarti 'senggang/tidak sibuk', sepadan dengan いそがしくないです (tidak sibuk). いそがしい (sibuk) justru lawan katanya, sedangkan ねむい (mengantuk) dan うれしい (senang) tidak berkaitan.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `この店は安いです。`, choices: [`この店はねだんが高くないです。`, `この店は小さいです。`, `この店は古いです。`, `この店はおいしくないです。`], a: 0, explanation: `安い (murah) berarti harganya tidak mahal, sepadan dengan ねだんが高くないです (harganya tidak mahal). Opsi lain membicarakan hal yang tidak berkaitan dengan harga.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `きのう、母にしかられました。`, choices: [`きのう、母はわたしをほめました。`, `きのう、母はわたしにあいました。`, `きのう、母はわたしにおこりました。`, `きのう、母はわたしをよびました。`], a: 2, explanation: `しかられました (dimarahi) berarti ibu marah kepada saya, sepadan dengan 母はわたしにおこりました (ibu marah pada saya). ほめました (memuji) berlawanan makna, あいました (bertemu) dan よびました (memanggil) tidak sesuai.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `山田さんは病気で会社を休みました。`, choices: [`山田さんは会社をやめました。`, `山田さんは体の具合が悪くて会社に行きませんでした。`, `山田さんは休みが好きです。`, `山田さんは元気で会社に行きました。`], a: 1, explanation: `病気で休みました berarti tidak masuk kerja karena sakit, sepadan dengan 体の具合が悪くて会社に行きませんでした (kondisi badan buruk sehingga tidak pergi kerja). やめました berarti 'berhenti kerja' (permanen), berbeda maknanya.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `この問題はやさしいです。`, choices: [`この問題はむずかしいです。`, `この問題は長いです。`, `この問題はふくざつです。`, `この問題はかんたんです。`], a: 3, explanation: `やさしい di sini berarti 'mudah', sepadan dengan かんたんです (sederhana/mudah). むずかしい (sulit) dan ふくざつ (rumit) justru lawan katanya.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `田中さんは料理が上手です。`, choices: [`田中さんは料理がじょうずにできます。`, `田中さんは料理をつくりません。`, `田中さんは料理がへたです。`, `田中さんは料理がすきではありません。`], a: 0, explanation: `上手です (mahir) sepadan dengan じょうずにできます (bisa melakukan dengan baik). へた (tidak mahir) justru lawan katanya, opsi lain juga tidak sesuai makna.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `彼はとても親切です。`, choices: [`彼は人にきょうみがありません。`, `彼は人にきびしいです。`, `彼は人にやさしくします。`, `彼は人がすきではありません。`], a: 2, explanation: `親切 (baik hati/ramah) sepadan dengan やさしくします (bersikap lembut/baik pada orang). きびしい (keras/tegas) adalah lawan makna, opsi lain tidak berkaitan.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `この道はとても静かです。`, choices: [`この道はせまいです。`, `この道は音があまりしません。`, `この道は工事中です。`, `この道はにぎやかです。`], a: 1, explanation: `静か (tenang/sepi) berarti minim suara, sepadan dengan 音があまりしません (tidak banyak bersuara). にぎやか (ramai) justru lawan katanya.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `妹は父ににています。`, choices: [`妹と父は全然ちがいます。`, `妹は父がすきではありません。`, `妹は父とけんかしました。`, `妹と父はかおがよく似ています。`], a: 3, explanation: `にています (mirip) berarti wajahnya serupa, sepadan dengan かおがよく似ています (wajahnya sangat mirip). ちがいます (berbeda) justru lawan makna.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `この仕事はもう終わりました。`, choices: [`この仕事はもうすみました。`, `この仕事はまだです。`, `この仕事はこれからです。`, `この仕事はやめました。`], a: 0, explanation: `終わりました (sudah selesai) sepadan dengan もうすみました (sudah selesai). まだ (belum) dan これから (mulai sekarang) berlawanan makna.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `電車がこんでいます。`, choices: [`電車の中に人がすくないです。`, `電車がとまっています。`, `電車の中に人がたくさんいます。`, `電車がおくれています。`], a: 2, explanation: `こんでいます (penuh sesak) sepadan dengan 人がたくさんいます (banyak orang di dalamnya). すくない (sedikit) justru lawan makna, とまっています (berhenti) dan おくれています (terlambat) tidak berkaitan.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `この花はめずらしいです。`, choices: [`この花はよく見かけます。`, `この花はやすいです。`, `この花はきれいではありません。`, `この花はあまり見かけません。`], a: 3, explanation: `めずらしい (langka/jarang) sepadan dengan あまり見かけません (jarang terlihat). よく見かけます (sering terlihat) justru lawan makna.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `兄は背が高いです。`, choices: [`兄は身長が高いです。`, `兄は年上です。`, `兄は足が長いです。`, `兄は体重が重いです。`], a: 0, explanation: `背が高い (tinggi badannya tinggi) sepadan dengan 身長が高いです (tinggi badannya tinggi). Opsi lain membahas usia, panjang kaki, atau berat badan yang tidak sama artinya.`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `彼女はよく忘れ物をします。`, choices: [`彼女はものをよく貸します。`, `彼女はものをよく壊します。`, `彼女はものをよく置いてきてしまいます。`, `彼女はものをよくなくします。`], a: 2, explanation: `忘れ物をします berarti 'sering meninggalkan/melupakan barangnya di suatu tempat', sepadan dengan ものをよく置いてきてしまいます (sering meninggalkan barang tanpa sengaja). なくします berarti 'menghilangkan barang' yang maknanya sedikit berbeda (bisa hilang di mana saja, bukan tertinggal di tempat tertentu).`, passage: ``, sectionLabel: `文字・語彙 · Ungkapan Sepadan (Paraphrase)`, problemNumber: 4 },
+            { q: `きのう、友達（　）映画を見に行きました。`, choices: [`が`, `と`, `の`, `を`], a: 1, explanation: `Partikel と digunakan untuk menyatakan 'bersama dengan' (teman sebagai partner aktivitas): 友達と映画を見に行きました (pergi nonton film bersama teman).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `このスープはとても熱い（　）、気をつけてください。`, choices: [`し`, `ので`, `とき`, `けど`], a: 1, explanation: `ので menyatakan sebab-akibat secara halus/objektif: 'karena sup ini sangat panas, harap hati-hati'. し dipakai untuk menyusun beberapa alasan sekaligus, とき berarti 'saat', dan けど berarti 'tetapi' — semuanya tidak pas di sini.`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `毎朝、パン（　）食べます。`, choices: [`で`, `が`, `に`, `を`], a: 3, explanation: `Partikel を menandai objek langsung dari kata kerja 食べます (makan): パンを食べます (makan roti).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `テストが終わった（　）、遊びに行きましょう。`, choices: [`たら`, `ら`, `なら`, `ても`], a: 1, explanation: `Pola ～たら dibentuk dari bentuk lampau (た-form) + ら, bukan menambahkan 'たら' utuh. Karena '終わった' sudah berbentuk lampau, cukup tambahkan 'ら' saja → 終わったら (setelah selesai), lalu ayo pergi bermain. Kalau ditambah 'たら' lagi hasilnya jadi '終わったたら' yang salah (dobel た). 'なら' menyatakan syarat dengan konteks berbeda, 'ても' berarti 'meskipun'.`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `この本はあなた（　）あげます。`, choices: [`が`, `を`, `に`, `で`], a: 2, explanation: `Partikel に menandai penerima pada pola ～をあげます (memberi kepada): あなたにあげます (memberikan kepadamu).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `雨が降って（　）、試合は中止になりました。`, choices: [`きて`, `いる`, `きたので`, `いたので`], a: 3, explanation: `いたので (bentuk lampau 'sedang' + karena) menjelaskan sebab pertandingan dibatalkan: karena hujan sedang/sudah turun (kondisi berlangsung), pertandingan dibatalkan. Konteks lampau pada 中止になりました menuntut alasan dalam bentuk lampau juga.`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `妹はピアノ（　）弾くことができます。`, choices: [`が`, `を`, `で`, `に`], a: 0, explanation: `Pada pola '～ことができます' (bisa melakukan), objek kemampuan sering ditandai partikel が: ピアノが弾くことができます (bisa memainkan piano).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `駅（　）歩いて十分ぐらいかかります。`, choices: [`に`, `を`, `まで`, `から`], a: 2, explanation: `まで menyatakan titik akhir/tujuan jarak: 駅まで歩いて十分 (butuh sepuluh menit jalan kaki sampai ke stasiun).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `この問題は私（　）わかりません。`, choices: [`には`, `への`, `では`, `とは`], a: 0, explanation: `には menekankan 'bagi saya (khususnya)': 私にはわかりません (bagi saya, ini tidak dimengerti), menyiratkan mungkin orang lain mengerti.`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `彼は日本語（　）英語（　）話せます。`, choices: [`が、が`, `を、を`, `は、は`, `も、も`], a: 3, explanation: `も...も digunakan untuk menyatakan 'baik...maupun...' (keduanya sama-sama berlaku): 日本語も英語も話せます (bisa bicara baik bahasa Jepang maupun bahasa Inggris).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `この薬は一日に三回（　）飲んでください。`, choices: [`ずつ`, `しか`, `ばかり`, `だけ`], a: 0, explanation: `ずつ menyatakan 'masing-masing/setiap kali sejumlah tertentu': 三回ずつ (tiga kali setiap harinya, secara merata/rutin).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `友達に傘を貸して（　）。`, choices: [`あげました`, `もらいました`, `やりました`, `くれました`], a: 3, explanation: `貸してくれました berarti 'teman meminjamkan (payung) untuk saya' — bentuk くれる dipakai saat orang lain melakukan sesuatu yang menguntungkan pembicara. あげました dan やりました berarti pembicara yang memberi, もらいました memerlukan struktur berbeda (〜に〜を貸してもらう).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `先生（　）この漢字の読み方を習いました。`, choices: [`から`, `を`, `に`, `で`], a: 0, explanation: `から menandai sumber pembelajaran: 先生から習いました (belajar dari guru). に juga bisa dipakai pada beberapa konteks 'belajar dari', tapi から lebih tepat menekankan sumber informasi/ilmu di sini.`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `電車の中で寝て（　）、駅を乗り過ごしました。`, choices: [`しまって`, `あって`, `みて`, `おいて`], a: 0, explanation: `～てしまう menyatakan penyesalan/hal yang terjadi di luar kendali: 寝てしまって (tanpa sengaja tertidur), sehingga kebablasan turun di stasiun.`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `母は私に「早く起き（　）」と言いました。`, choices: [`ません`, `たい`, `なさい`, `ました`], a: 2, explanation: `～なさい adalah bentuk perintah lembut yang biasa dipakai orang tua/guru: 早く起きなさい (bangunlah lebih awal).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `この部屋は静か（　）、勉強しやすいです。`, choices: [`に`, `で`, `だ`, `の`], a: 1, explanation: `Kata sifat-na (静か) yang menghubungkan ke klausa berikutnya menggunakan bentuk て/で: 静かで (tenang, dan...), lalu 勉強しやすいです (mudah belajar).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `宿題をし（　）テレビを見てはいけません。`, choices: [`なくて`, `ずに`, `ないと`, `ないで`], a: 3, explanation: `～ないで berarti 'tanpa melakukan': 宿題をしないでテレビを見てはいけません (tidak boleh menonton TV tanpa mengerjakan PR dulu). ずに memiliki makna serupa tapi lebih formal dan biasanya tidak dipasangkan langsung dengan pola larangan ini secara alami di level N5.`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `空が暗くなってきた（　）、そろそろ帰りましょう。`, choices: [`ので`, `のに`, `けど`, `が`], a: 0, explanation: `ので menyatakan sebab: karena langit mulai gelap, ayo segera pulang. のに (padahal) menyiratkan pertentangan yang tidak sesuai konteks ini.`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `彼女は結婚（　）仕事を続けています。`, choices: [`したら`, `しても`, `しては`, `すると`], a: 1, explanation: `～ても berarti 'meskipun/walaupun': 結婚しても仕事を続けています (meskipun sudah menikah, tetap melanjutkan kerja).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `このカメラは小さくて軽い（　）、写真もきれいです。`, choices: [`が`, `のに`, `ても`, `し`], a: 3, explanation: `し dipakai untuk menyusun beberapa alasan/fakta positif sekaligus: 小さくて軽いし、写真もきれいです (kecil dan ringan, lagipula fotonya juga bagus).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `田中さんはまだ来て（　）ようです。`, choices: [`きた`, `いった`, `いない`, `いる`], a: 2, explanation: `～ていない berarti 'belum melakukan': まだ来ていないようです (sepertinya belum datang).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `子供（　）こんな難しい本は読めません。`, choices: [`に`, `が`, `を`, `の`], a: 0, explanation: `に pada pola ini menandai 'bagi/untuk (subjek kemampuan)': 子供にはこんな難しい本は読めません (bagi anak-anak, buku sesulit ini tidak bisa dibaca).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `会議の時間が（　）変更になりました。`, choices: [`三時で四時と`, `三時に四時を`, `三時から四時に`, `三時を四時が`], a: 2, explanation: `Pola 'AからBに変更になりました' menyatakan perubahan dari A ke B: 三時から四時に変更になりました (waktu rapat berubah dari jam 3 menjadi jam 4).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `熱がある（　）、学校を休みます。`, choices: [`けど`, `でも`, `し、し`, `ので`], a: 3, explanation: `ので menyatakan sebab: karena sedang demam, jadi tidak masuk sekolah.`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `料理ができた（　）教えてください。`, choices: [`けど`, `ら`, `でも`, `し`], a: 1, explanation: `～たら (di sini disingkat menjadi 「た」+「ら」) menyatakan 'kalau sudah/setelah': できたら教えてください (kalau masakannya sudah jadi, tolong beri tahu saya).`, passage: ``, sectionLabel: `文法 · Partikel & Pola Kalimat`, problemNumber: 5 },
+            { q: `きのう ＿＿＿ ★ ＿＿＿ ＿＿＿ 買いました。`, choices: [`①デパートで`, `③安い`, `④値段で`, `②新しいかばんを`], a: 1, explanation: `Susunan yang benar: ①デパートで③安い④値段で②新しいかばんを買いました (Kemarin, membeli tas baru dengan harga murah di department store). Posisi ★ (ke-2) diisi oleh ③安い.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `この本は ＿＿＿ ★ ＿＿＿ ＿＿＿ です。`, choices: [`①とても`, `②読みやすくて`, `③人気が`, `④ある`], a: 3, explanation: `Susunan yang dimaksud menekankan bahwa buku ini 'sangat mudah dibaca dan populer' (とても読みやすくて人気がある). Posisi ★ (ke-2) diisi oleh ④ある sesuai kunci jawaban.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `駅から ＿＿＿ ★ ＿＿＿ ＿＿＿ 着きます。`, choices: [`①歩いて`, `②十分ぐらいで`, `④まっすぐ`, `③会社に`], a: 1, explanation: `Susunan: ①歩いて②十分ぐらいで④まっすぐ③会社に着きます (Dari stasiun, jalan kaki sekitar sepuluh menit lurus sampai ke kantor). Posisi ★ (ke-2) diisi oleh ②十分ぐらいで.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `彼女は ＿＿＿ ＿＿＿ ★ ＿＿＿ 料理を作っています。`, choices: [`①毎日`, `②家族の`, `④ために`, `③おいしい`], a: 2, explanation: `Susunan: ①毎日②家族の④ために③おいしい料理を作っています (Setiap hari, demi keluarganya, dia membuat masakan yang enak). Posisi ★ (ke-3) diisi oleh ④ために.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `宿題が ＿＿＿ ★ ＿＿＿ ＿＿＿ 遊びに行きます。`, choices: [`①終わったら`, `②友達と`, `④一緒に`, `③公園へ`], a: 1, explanation: `Susunan: ①終わったら②友達と④一緒に③公園へ遊びに行きます (Kalau PR sudah selesai, akan pergi bermain ke taman bersama teman). Posisi ★ (ke-2) diisi oleh ②友達と.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `この薬は ＿＿＿ ＿＿＿ ★ ＿＿＿ ください。`, choices: [`①一日に`, `②三回`, `④ずつ`, `③飲んで`], a: 2, explanation: `Susunan: ①一日に②三回④ずつ③飲んでください (Tolong minum obat ini tiga kali sehari, masing-masing sesuai takaran). Posisi ★ (ke-3) diisi oleh ④ずつ.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `父は ＿＿＿ ★ ＿＿＿ ＿＿＿ 会社です。`, choices: [`①駅から`, `④とても`, `②近い`, `③働いている`], a: 1, explanation: `Susunan: ①駅から④とても②近い③働いている会社です (Kantor tempat ayah bekerja sangat dekat dari stasiun). Posisi ★ (ke-2) diisi oleh ④とても.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `母が ＿＿＿ ★ ＿＿＿ ＿＿＿ 食べました。`, choices: [`③料理を`, `②くれた`, `①作って`, `④おいしく`], a: 1, explanation: `Susunan yang wajar: 母が作ってくれた料理をおいしく食べました (memakan dengan lezat masakan yang dibuatkan ibu untuk saya). Posisi ★ (ke-2) diisi oleh ②くれた sesuai kunci jawaban, menekankan makna 'dibuatkan untuk saya' (～てくれる).`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `テストが ＿＿＿ ＿＿＿ ★ ＿＿＿ 旅行に行きたいです。`, choices: [`①終わったら`, `②友達と`, `③海外`, `④へ`], a: 2, explanation: `Susunan: ①終わったら②友達と③海外④へ旅行に行きたいです (Kalau tes sudah selesai, ingin pergi wisata ke luar negeri bersama teman). Posisi ★ (ke-3) diisi oleh ③海外.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `このカメラは ＿＿＿ ★ ＿＿＿ ＿＿＿ 写真がきれいです。`, choices: [`①小さくて`, `②軽い`, `③のに`, `④とても`], a: 1, explanation: `Susunan: ①小さくて②軽い③のに④とても写真がきれいです (Meskipun kamera ini kecil dan ringan, fotonya sangat bagus). Posisi ★ (ke-2) diisi oleh ②軽い.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `友達に ＿＿＿ ★ ＿＿＿ ＿＿＿ もらいました。`, choices: [`①誕生日に`, `④きれいな`, `③素敵な`, `②プレゼントを`], a: 1, explanation: `Susunan: ①誕生日に④きれいな③素敵な②プレゼントをもらいました (Menerima kado yang cantik dan bagus dari teman saat ulang tahun). Posisi ★ (ke-2) diisi oleh ④きれいな.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `雨が ＿＿＿ ＿＿＿ ★ ＿＿＿ 試合は中止になりました。`, choices: [`④朝から`, `①強く`, `②降って`, `③きたので`], a: 2, explanation: `Susunan: ④朝から①強く②降って③きたので試合は中止になりました (Karena sejak pagi hujan turun deras, pertandingan dibatalkan). Posisi ★ (ke-3) diisi oleh ②降って.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `この部屋は ＿＿＿ ★ ＿＿＿ ＿＿＿ 勉強しやすいです。`, choices: [`③とても`, `①静かで`, `②明るくて`, `④広くて`], a: 1, explanation: `Susunan: ③とても①静かで②明るくて④広くて勉強しやすいです (Karena sangat tenang, terang, dan luas, ruangan ini mudah untuk belajar). Posisi ★ (ke-2) diisi oleh ①静かで.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `彼は ＿＿＿ ★ ＿＿＿ ＿＿＿ 国の人です。`, choices: [`①日本から`, `②遠い`, `③とても`, `④離れた`], a: 1, explanation: `Susunan: ①日本から③とても④離れた②遠い国の人です (Dia orang dari negara yang sangat jauh terpisah dari Jepang). Posisi ★ (ke-2) diisi oleh ②遠い sesuai kunci jawaban.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `祖母は ＿＿＿ ＿＿＿ ★ ＿＿＿ 元気です。`, choices: [`①年を`, `④とった`, `③とても`, `②とっても`], a: 2, explanation: `Susunan: ①年を④とった③とても②とっても元気です (Meski nenek sudah lanjut usia, beliau tetap sangat sehat). Posisi ★ (ke-3) diisi oleh ③とても.`, passage: ``, sectionLabel: `文法 · Menyusun Kalimat (★)`, problemNumber: 6 },
+            { q: `「わたしの一日」: それから、シャワーを（41）、朝ご飯を食べます。`, choices: [`浴びるので`, `浴びたり`, `浴びて`, `浴びれば`], a: 2, explanation: `Bentuk ～て digunakan untuk menghubungkan dua kegiatan berurutan: シャワーを浴びて、朝ご飯を食べます (mandi shower, lalu makan sarapan).`, passage: `<p style="font-weight:700;margin-bottom:6px;">わたしの一日</p><p style="white-space:normal;line-height:1.9;">わたしは毎朝六時に起きます。それから、シャワーを（41）、朝ご飯を食べます。七時半に家を出て、学校へ行きます。学校は家から（42）三十分ぐらいです。授業は九時から始まって、三時半に終わります。授業が終わった（43）、友達と図書館で勉強します。図書館は静かなので、勉強（44）です。夜、家に帰ってから晩ご飯を食べて、宿題をします。宿題が終わったら、少しテレビを見て、十一時に寝ます。毎日忙しいですが、（45）楽しいです。</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「わたしの一日」: 学校は家から（42）三十分ぐらいです。`, choices: [`歩いて`, `歩くと`, `歩いても`, `歩けば`], a: 0, explanation: `Pola '～て+ durasi' menyatakan cara/metode menuju suatu tempat beserta lama waktunya: 歩いて三十分 (kalau jalan kaki, sekitar tiga puluh menit).`, passage: `<p style="font-weight:700;margin-bottom:6px;">わたしの一日</p><p style="white-space:normal;line-height:1.9;">わたしは毎朝六時に起きます。それから、シャワーを（41）、朝ご飯を食べます。七時半に家を出て、学校へ行きます。学校は家から（42）三十分ぐらいです。授業は九時から始まって、三時半に終わります。授業が終わった（43）、友達と図書館で勉強します。図書館は静かなので、勉強（44）です。夜、家に帰ってから晩ご飯を食べて、宿題をします。宿題が終わったら、少しテレビを見て、十一時に寝ます。毎日忙しいですが、（45）楽しいです。</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「わたしの一日」: 授業が終わった（43）、友達と図書館で勉強します。`, choices: [`ときに`, `あとで`, `うちに`, `まえに`], a: 1, explanation: `あとで berarti 'setelah': 終わったあとで (setelah pelajaran selesai), lalu belajar bersama teman di perpustakaan.`, passage: `<p style="font-weight:700;margin-bottom:6px;">わたしの一日</p><p style="white-space:normal;line-height:1.9;">わたしは毎朝六時に起きます。それから、シャワーを（41）、朝ご飯を食べます。七時半に家を出て、学校へ行きます。学校は家から（42）三十分ぐらいです。授業は九時から始まって、三時半に終わります。授業が終わった（43）、友達と図書館で勉強します。図書館は静かなので、勉強（44）です。夜、家に帰ってから晩ご飯を食べて、宿題をします。宿題が終わったら、少しテレビを見て、十一時に寝ます。毎日忙しいですが、（45）楽しいです。</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「わたしの一日」: 図書館は静かなので、勉強（44）です。`, choices: [`してほしい`, `しにくい`, `したい`, `しやすい`], a: 3, explanation: `Pola ～やすい berarti 'mudah untuk melakukan': 勉強しやすい (mudah untuk belajar), sesuai dengan alasan perpustakaan yang tenang.`, passage: `<p style="font-weight:700;margin-bottom:6px;">わたしの一日</p><p style="white-space:normal;line-height:1.9;">わたしは毎朝六時に起きます。それから、シャワーを（41）、朝ご飯を食べます。七時半に家を出て、学校へ行きます。学校は家から（42）三十分ぐらいです。授業は九時から始まって、三時半に終わります。授業が終わった（43）、友達と図書館で勉強します。図書館は静かなので、勉強（44）です。夜、家に帰ってから晩ご飯を食べて、宿題をします。宿題が終わったら、少しテレビを見て、十一時に寝ます。毎日忙しいですが、（45）楽しいです。</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「わたしの一日」: 毎日忙しいですが、（45）楽しいです。`, choices: [`ぜんぜん`, `とても`, `あまり`, `けっして`], a: 1, explanation: `とても berarti 'sangat' dan cocok untuk pernyataan positif '(meski sibuk) tapi sangat menyenangkan'. ぜんぜん, あまり, dan けっして biasanya diikuti bentuk negatif.`, passage: `<p style="font-weight:700;margin-bottom:6px;">わたしの一日</p><p style="white-space:normal;line-height:1.9;">わたしは毎朝六時に起きます。それから、シャワーを（41）、朝ご飯を食べます。七時半に家を出て、学校へ行きます。学校は家から（42）三十分ぐらいです。授業は九時から始まって、三時半に終わります。授業が終わった（43）、友達と図書館で勉強します。図書館は静かなので、勉強（44）です。夜、家に帰ってから晩ご飯を食べて、宿題をします。宿題が終わったら、少しテレビを見て、十一時に寝ます。毎日忙しいですが、（45）楽しいです。</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「山田さんへのメール」: 来週の土曜日、誕生日パーティーを（41）と思っています。`, choices: [`しよう`, `して`, `した`, `しない`], a: 0, explanation: `Pola '～（よ）うと思う' menyatakan niat/rencana: パーティーをしようと思っています (bermaksud mengadakan pesta).`, passage: `<p style="font-weight:700;margin-bottom:6px;">山田さんへのメール</p><p style="white-space:normal;line-height:1.9;">山田さん<br><br>お元気ですか。来週の土曜日、わたしの誕生日パーティーを（41）と思っています。よかったら、来て（42）でしょうか。場所はわたしの家です。時間は午後六時からです。パーティーには田中さんや鈴木さん（43）来る予定です。何か食べたい物が（44）、教えてください。準備しておきます。それでは、土曜日（45）お待ちしています。<br><br>田中</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「山田さんへのメール」: よかったら、来て（42）でしょうか。`, choices: [`もらわない`, `くれない`, `いただけない`, `あげられない`], a: 2, explanation: `～ていただけないでしょうか adalah bentuk sopan untuk meminta tolong dengan halus: 来ていただけないでしょうか (bolehkah Anda datang?).`, passage: `<p style="font-weight:700;margin-bottom:6px;">山田さんへのメール</p><p style="white-space:normal;line-height:1.9;">山田さん<br><br>お元気ですか。来週の土曜日、わたしの誕生日パーティーを（41）と思っています。よかったら、来て（42）でしょうか。場所はわたしの家です。時間は午後六時からです。パーティーには田中さんや鈴木さん（43）来る予定です。何か食べたい物が（44）、教えてください。準備しておきます。それでは、土曜日（45）お待ちしています。<br><br>田中</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「山田さんへのメール」: パーティーには田中さんや鈴木さん（43）来る予定です。`, choices: [`ばかり`, `しか`, `だけ`, `なども`], a: 3, explanation: `など (dan lain-lain) menunjukkan daftar contoh yang tidak lengkap/masih ada yang lain: 田中さんや鈴木さんなども来る予定 (Tanaka, Suzuki, dan lain-lain juga akan datang).`, passage: `<p style="font-weight:700;margin-bottom:6px;">山田さんへのメール</p><p style="white-space:normal;line-height:1.9;">山田さん<br><br>お元気ですか。来週の土曜日、わたしの誕生日パーティーを（41）と思っています。よかったら、来て（42）でしょうか。場所はわたしの家です。時間は午後六時からです。パーティーには田中さんや鈴木さん（43）来る予定です。何か食べたい物が（44）、教えてください。準備しておきます。それでは、土曜日（45）お待ちしています。<br><br>田中</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「山田さんへのメール」: 何か食べたい物が（44）、教えてください。`, choices: [`あるなら`, `あると`, `あっても`, `あったら`], a: 3, explanation: `～たら menyatakan syarat 'kalau ada': 食べたい物があったら、教えてください (kalau ada makanan yang ingin dimakan, tolong beri tahu).`, passage: `<p style="font-weight:700;margin-bottom:6px;">山田さんへのメール</p><p style="white-space:normal;line-height:1.9;">山田さん<br><br>お元気ですか。来週の土曜日、わたしの誕生日パーティーを（41）と思っています。よかったら、来て（42）でしょうか。場所はわたしの家です。時間は午後六時からです。パーティーには田中さんや鈴木さん（43）来る予定です。何か食べたい物が（44）、教えてください。準備しておきます。それでは、土曜日（45）お待ちしています。<br><br>田中</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「山田さんへのメール」: 土曜日（45）お待ちしています。`, choices: [`が`, `で`, `に`, `を`], a: 2, explanation: `Partikel に digunakan untuk menandai waktu tertentu: 土曜日に (pada hari Sabtu) お待ちしています (menunggu kedatangan Anda).`, passage: `<p style="font-weight:700;margin-bottom:6px;">山田さんへのメール</p><p style="white-space:normal;line-height:1.9;">山田さん<br><br>お元気ですか。来週の土曜日、わたしの誕生日パーティーを（41）と思っています。よかったら、来て（42）でしょうか。場所はわたしの家です。時間は午後六時からです。パーティーには田中さんや鈴木さん（43）来る予定です。何か食べたい物が（44）、教えてください。準備しておきます。それでは、土曜日（45）お待ちしています。<br><br>田中</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「駅前の新しいスーパー」: 先月、駅前に新しいスーパーが（41）。`, choices: [`できています`, `できました`, `できるでしょう`, `できていました`], a: 1, explanation: `できました (bentuk lampau dari できる=terbentuk/berdiri) sesuai dengan keterangan waktu 先月 (bulan lalu): supermarket baru itu (baru saja) berdiri bulan lalu.`, passage: `<p style="font-weight:700;margin-bottom:6px;">駅前の新しいスーパー</p><p style="white-space:normal;line-height:1.9;">先月、駅前に新しいスーパーが（41）。とても便利な場所に（42）ので、毎日たくさんの人が来ます。野菜や果物は近くの農家から（43）いて、新鮮で安いです。夜十時まで開いているので、仕事が（44）あとでも買い物ができます。わたしはこのスーパーが好きで、（45）利用しています。</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「駅前の新しいスーパー」: とても便利な場所に（42）ので、毎日たくさんの人が来ます。`, choices: [`あります`, `あった`, `ある`, `あって`], a: 0, explanation: `Bentuk sopan ～ます (あります) digunakan untuk menyatakan fakta keberadaan di masa kini: 便利な場所にあります (terletak di tempat yang strategis), sehingga banyak orang datang setiap hari.`, passage: `<p style="font-weight:700;margin-bottom:6px;">駅前の新しいスーパー</p><p style="white-space:normal;line-height:1.9;">先月、駅前に新しいスーパーが（41）。とても便利な場所に（42）ので、毎日たくさんの人が来ます。野菜や果物は近くの農家から（43）いて、新鮮で安いです。夜十時まで開いているので、仕事が（44）あとでも買い物ができます。わたしはこのスーパーが好きで、（45）利用しています。</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「駅前の新しいスーパー」: 野菜や果物は近くの農家から（43）いて、新鮮で安いです。`, choices: [`届けられて`, `届けて`, `届いて`, `届かせて`], a: 2, explanation: `届いて (bentuk intransitif dari 届く=sampai/tiba) menyatakan sayur dan buah 'dikirim/tiba' dari petani sekitar: 農家から届いていて (dikirimkan dari petani setempat), sehingga segar dan murah.`, passage: `<p style="font-weight:700;margin-bottom:6px;">駅前の新しいスーパー</p><p style="white-space:normal;line-height:1.9;">先月、駅前に新しいスーパーが（41）。とても便利な場所に（42）ので、毎日たくさんの人が来ます。野菜や果物は近くの農家から（43）いて、新鮮で安いです。夜十時まで開いているので、仕事が（44）あとでも買い物ができます。わたしはこのスーパーが好きで、（45）利用しています。</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「駅前の新しいスーパー」: 夜十時まで開いているので、仕事が（44）あとでも買い物ができます。`, choices: [`終わる`, `終わって`, `終わり`, `終わった`], a: 3, explanation: `Sebelum kata benda あと (setelah), kata kerja harus dalam bentuk lampau biasa: 終わったあとで (setelah pekerjaan selesai), sehingga bisa berbelanja meski selesai kerja larut.`, passage: `<p style="font-weight:700;margin-bottom:6px;">駅前の新しいスーパー</p><p style="white-space:normal;line-height:1.9;">先月、駅前に新しいスーパーが（41）。とても便利な場所に（42）ので、毎日たくさんの人が来ます。野菜や果物は近くの農家から（43）いて、新鮮で安いです。夜十時まで開いているので、仕事が（44）あとでも買い物ができます。わたしはこのスーパーが好きで、（45）利用しています。</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `「駅前の新しいスーパー」: わたしはこのスーパーが好きで、（45）利用しています。`, choices: [`よく`, `たまに`, `めったに`, `ぜんぜん`], a: 0, explanation: `よく (sering) cocok dengan pernyataan positif 'suka dan sering menggunakannya'. たまに (kadang-kadang) kurang kuat, めったに dan ぜんぜん biasanya berpasangan dengan bentuk negatif.`, passage: `<p style="font-weight:700;margin-bottom:6px;">駅前の新しいスーパー</p><p style="white-space:normal;line-height:1.9;">先月、駅前に新しいスーパーが（41）。とても便利な場所に（42）ので、毎日たくさんの人が来ます。野菜や果物は近くの農家から（43）いて、新鮮で安いです。夜十時まで開いているので、仕事が（44）あとでも買い物ができます。わたしはこのスーパーが好きで、（45）利用しています。</p>`, sectionLabel: `文法 · Tata Bahasa dalam Bacaan`, problemNumber: 7 },
+            { q: `この メールで 一番 伝えたい ことは 何ですか。`, choices: [`会議の時間が変わったこと。`, `会議の部屋が変わったこと。`, `資料が届かなかったこと。`, `会議が中止になったこと。`], a: 1, explanation: `Isi email menyebutkan waktu rapat tetap jam 2 siang, tapi ruangannya berubah menjadi ruang 301 — itulah inti pesan yang paling ditekankan ('気をつけてください' setelah info ruangan berubah). Waktu tidak berubah, resource cadangan hanya disebut untuk berjaga-jaga (bukan berarti resource tidak sampai), dan rapat tidak dibatalkan.`, passage: `<p style="font-weight:700;margin-bottom:6px;">メール（鈴木さんから田中さんへ）</p><p style="white-space:normal;line-height:1.9;">田中さん<br><br>明日の会議の資料を送ります。会議は午後二時からですが、部屋が301号室に変わりましたので、気をつけてください。資料は五枚あります。もし印刷できない場合は、会議室に予備を用意しておきますので、ご安心ください。<br><br>鈴木</p>`, sectionLabel: `読解 · Bacaan Pendek`, problemNumber: 8 },
+            { q: `来月から、図書館は何曜日が休みですか。`, choices: [`水曜日`, `火曜日`, `土曜日`, `月曜日`], a: 1, explanation: `Teks menyebutkan dengan jelas: dulu libur hari Senin, tapi mulai bulan depan libur menjadi hari Selasa (火曜日).`, passage: `<p style="font-weight:700;margin-bottom:6px;">お知らせ（図書館から）</p><p style="white-space:normal;line-height:1.9;">＜図書館からのお知らせ＞<br><br>来月から、図書館の休館日が変わります。今までは月曜日が休みでしたが、来月からは火曜日が休みになります。また、開館時間は午前九時から午後六時までです。ご利用の際はお気をつけください。</p>`, sectionLabel: `読解 · Bacaan Pendek`, problemNumber: 8 },
+            { q: `五千円の服を買ったら、いくら払いますか。`, choices: [`六千円`, `四千五百円`, `五千円`, `四千円`], a: 3, explanation: `Diskon 20% berlaku untuk semua pakaian. 20% dari 5000 yen adalah 1000 yen, jadi yang dibayar adalah 5000 - 1000 = 4000 yen.`, passage: `<p style="font-weight:700;margin-bottom:6px;">広告（春の大セール）</p><p style="white-space:normal;line-height:1.9;">【春の大セール】<br><br>三月一日から三月十日まで、店内の洋服が全部二十パーセント引きになります。さらに、五千円以上お買い上げの方には、かわいいバッグをプレゼント！この機会をお見逃しなく。</p>`, sectionLabel: `読解 · Bacaan Pendek`, problemNumber: 8 },
+            { q: `ゆきさんは何を聞きたいですか。`, choices: [`夏休みはいつからかどうか。`, `おばあちゃんは元気かどうか。`, `夏休みにおばあちゃんの家に行ってもいいかどうか。`, `おばあちゃんの誕生日はいつか。`], a: 2, explanation: `Surat menyebutkan Yuki ingin menginap sekitar 1 minggu mulai 10 Agustus, dan menanyakan '大丈夫ですか' (apakah tidak apa-apa) serta '都合を教えてください' (tolong beri tahu jika cocok) — artinya ia sedang meminta izin untuk berkunjung/menginap.`, passage: `<p style="font-weight:700;margin-bottom:6px;">手紙（ゆきさんからおばあちゃんへ）</p><p style="white-space:normal;line-height:1.9;">おばあちゃんへ<br><br>元気ですか。わたしは元気です。今度の夏休みに、おばあちゃんの家へ遊びに行きたいです。八月十日から一週間ぐらい泊まりたいのですが、大丈夫ですか。都合を教えてください。<br><br>ゆき</p>`, sectionLabel: `読解 · Bacaan Pendek`, problemNumber: 8 },
+            { q: `七月六日、エレベーターは使えますか。`, choices: [`使えない。`, `午後だけ使える。`, `使える。`, `午前中だけ使える。`], a: 0, explanation: `Perbaikan lift berlangsung dari tanggal 5 sampai 7 Juli, sehingga tanggal 6 Juli termasuk dalam rentang tersebut dan lift tidak bisa digunakan sama sekali pada hari itu.`, passage: `<p style="font-weight:700;margin-bottom:6px;">掲示（エレベーター工事のお知らせ）</p><p style="white-space:normal;line-height:1.9;">＜エレベーター工事のお知らせ＞<br><br>七月五日から七月七日まで、エレベーターの点検工事を行います。この間、エレベーターは使えません。ご不便をおかけしますが、階段をご利用ください。</p>`, sectionLabel: `読解 · Bacaan Pendek`, problemNumber: 8 },
+            { q: `この人は今日、公園で何をしましたか。`, choices: [`本を読んだ。`, `サッカーをした。`, `写真をとった。`, `お弁当を食べた。`], a: 3, explanation: `Teks menyebutkan penulis membawa bekal (お弁当) dan memakannya di bawah pohon sambil menikmati bunga sakura, jadi jawabannya adalah makan bekal.`, passage: `<p style="font-weight:700;margin-bottom:6px;">ブログ（お花見）</p><p style="white-space:normal;line-height:1.9;">今日は久しぶりに公園に行きました。桜がとてもきれいに咲いていて、たくさんの人がお花見をしていました。わたしもお弁当を持って行って、木の下で食べました。とても気持ちがよかったです。来週も天気がよかったら、また行きたいです。</p>`, sectionLabel: `読解 · Bacaan Pendek`, problemNumber: 8 },
+            { q: `けんさんのお母さんは、晩ご飯に何を食べますか。`, choices: [`外で買ってきた弁当。`, `冷蔵庫にあるカレー。`, `けんさんが作った料理。`, `レストランの料理。`], a: 1, explanation: `Memo menyebutkan ada kari di kulkas dan meminta ibunya menghangatkan serta memakannya duluan, jadi makan malamnya adalah kari yang ada di kulkas.`, passage: `<p style="font-weight:700;margin-bottom:6px;">メモ（けんさんからお母さんへ）</p><p style="white-space:normal;line-height:1.9;">お母さんへ<br><br>今日は残業で帰りが九時ごろになります。晩ご飯は先に食べていてください。冷蔵庫にカレーがあるので、それを温めて食べてください。<br><br>けん</p>`, sectionLabel: `読解 · Bacaan Pendek`, problemNumber: 8 },
+            { q: `六歳の子供が一人でプールに入ってもいいですか。`, choices: [`はい、一人で入れます。`, `はい、無料で入れます。`, `いいえ、保護者と一緒でないと入れません。`, `いいえ、午後しか入れません。`], a: 2, explanation: `Papan pengumuman menyatakan anak usia SD ke bawah (小学生以下) harus ditemani wali/orang tua. Anak usia 6 tahun termasuk kategori ini, sehingga tidak boleh masuk sendirian.`, passage: `<p style="font-weight:700;margin-bottom:6px;">案内（市民プール）</p><p style="white-space:normal;line-height:1.9;">＜市民プールのご案内＞<br><br>利用時間：午前九時〜午後五時<br>利用料金：おとな三百円　こども百円<br>＊小学生以下は保護者と一緒にご利用ください。</p>`, sectionLabel: `読解 · Bacaan Pendek`, problemNumber: 8 },
+            { q: `この人は先週、何をしましたか。`, choices: [`タイ料理を作った。`, `イタリア料理を作った。`, `料理教室に通った。`, `レストランに行った。`], a: 0, explanation: `Teks menyebutkan '先週はタイ料理に挑戦しました' (minggu lalu mencoba membuat masakan Thailand), jadi jawabannya jelas masakan Thailand.`, passage: `<p style="font-weight:700;margin-bottom:6px;">エッセイ（料理）</p><p style="white-space:normal;line-height:1.9;">わたしは料理が好きです。特に、週末に時間があるとき、いろいろな国の料理を作ってみます。先週はタイ料理に挑戦しました。スーパーで材料を買って、インターネットでレシピを調べながら作りました。初めて作ったので、少し辛くなりすぎてしまいましたが、家族はおいしいと言ってくれました。今度はもっと上手に作れるように、練習したいと思います。来月はイタリア料理に挑戦する予定です。</p>`, sectionLabel: `読解 · Bacaan Menengah`, problemNumber: 9 },
+            { q: `この人は来月、何をする予定ですか。`, choices: [`イタリア料理を作る。`, `料理教室に通う。`, `タイ料理をもう一度作る。`, `レストランを開く。`], a: 0, explanation: `Kalimat terakhir menyebutkan '来月はイタリア料理に挑戦する予定です' (bulan depan berencana mencoba masakan Italia).`, passage: `<p style="font-weight:700;margin-bottom:6px;">エッセイ（料理）</p><p style="white-space:normal;line-height:1.9;">わたしは料理が好きです。特に、週末に時間があるとき、いろいろな国の料理を作ってみます。先週はタイ料理に挑戦しました。スーパーで材料を買って、インターネットでレシピを調べながら作りました。初めて作ったので、少し辛くなりすぎてしまいましたが、家族はおいしいと言ってくれました。今度はもっと上手に作れるように、練習したいと思います。来月はイタリア料理に挑戦する予定です。</p>`, sectionLabel: `読解 · Bacaan Menengah`, problemNumber: 9 },
+            { q: `電車の中で電話で話さないのはなぜですか。`, choices: [`お金がかかるから。`, `禁止されているから。`, `電波が悪いから。`, `ほかの人の迷惑になるから。`], a: 3, explanation: `Teks menyebutkan menelepon di kereta 'ほかの人の迷惑になる' (mengganggu orang lain), itulah sebabnya jarang dilakukan — bukan karena dilarang secara resmi, biaya, atau sinyal buruk.`, passage: `<p style="font-weight:700;margin-bottom:6px;">説明文（電車やバスのマナー）</p><p style="white-space:normal;line-height:1.9;">日本では、電車やバスの中でマナーがとても大切にされています。例えば、電話で話すことは、ほかの人の迷惑になるので、あまりしません。また、席に座っているときは、荷物をひざの上に置いて、隣の人のじゃまにならないようにします。お年寄りや体の不自由な人が乗ってきたら、席をゆずることも大切なマナーの一つです。こうしたマナーを守ることで、みんなが気持ちよく電車やバスを利用できます。</p>`, sectionLabel: `読解 · Bacaan Menengah`, problemNumber: 9 },
+            { q: `この文章の内容と合っているのはどれですか。`, choices: [`電車の中では話してはいけない。`, `お年寄りが乗ってきたら、席をゆずったほうがいい。`, `電車の中では荷物を必ず網棚に置く。`, `バスにはマナーがない。`], a: 1, explanation: `Teks menyebutkan bahwa memberi tempat duduk kepada orang tua/lansia atau penyandang disabilitas adalah salah satu etika penting (席をゆずることも大切なマナー). Opsi lain tidak sesuai dengan isi teks (teks tidak melarang total bicara, tidak mewajibkan barang ditaruh di rak, dan bus juga disebut punya etika yang sama).`, passage: `<p style="font-weight:700;margin-bottom:6px;">説明文（電車やバスのマナー）</p><p style="white-space:normal;line-height:1.9;">日本では、電車やバスの中でマナーがとても大切にされています。例えば、電話で話すことは、ほかの人の迷惑になるので、あまりしません。また、席に座っているときは、荷物をひざの上に置いて、隣の人のじゃまにならないようにします。お年寄りや体の不自由な人が乗ってきたら、席をゆずることも大切なマナーの一つです。こうしたマナーを守ることで、みんなが気持ちよく電車やバスを利用できます。</p>`, sectionLabel: `読解 · Bacaan Menengah`, problemNumber: 9 },
+            { q: `この人は何に困っていますか。`, choices: [`駅までの道が遠いこと。`, `駅前に店が少ないこと。`, `駐輪場に自転車を止められないこと。`, `電車が時間通りに来ないこと。`], a: 2, explanation: `Penulis mengeluhkan tempat parkir sepeda di depan stasiun selalu penuh sehingga sulit memarkir sepeda, terutama saat pagi hari sedang buru-buru.`, passage: `<p style="font-weight:700;margin-bottom:6px;">投書（駅前の駐輪場について）</p><p style="white-space:normal;line-height:1.9;">わたしは駅前の駐輪場について、意見があります。最近、駅前の駐輪場がいつもいっぱいで、自転車を止められないことが多いです。朝、急いでいるときに止める場所がないと、とても困ります。市には、もっと駐輪場を増やしてほしいと思います。自転車で駅まで来る人が増えているので、これからも駐輪場の問題は大きくなると思います。早く対策をとってもらいたいです。</p>`, sectionLabel: `読解 · Bacaan Menengah`, problemNumber: 9 },
+            { q: `この人が市にしてほしいことは何ですか。`, choices: [`自転車の値段を安くすること。`, `駐輪場を増やすこと。`, `電車の本数を増やすこと。`, `駅を新しく作ること。`], a: 1, explanation: `Penulis secara eksplisit menulis '市には、もっと駐輪場を増やしてほしいと思います' (berharap pemerintah kota menambah tempat parkir sepeda).`, passage: `<p style="font-weight:700;margin-bottom:6px;">投書（駅前の駐輪場について）</p><p style="white-space:normal;line-height:1.9;">わたしは駅前の駐輪場について、意見があります。最近、駅前の駐輪場がいつもいっぱいで、自転車を止められないことが多いです。朝、急いでいるときに止める場所がないと、とても困ります。市には、もっと駐輪場を増やしてほしいと思います。自転車で駅まで来る人が増えているので、これからも駐輪場の問題は大きくなると思います。早く対策をとってもらいたいです。</p>`, sectionLabel: `読解 · Bacaan Menengah`, problemNumber: 9 },
+            { q: `両親はどうしてなかなか犬を飼わせてくれませんでしたか。`, choices: [`犬が嫌いだったから。`, `この人が忙しかったから。`, `マンションに住んでいたから。`, `お金がなかったから。`], a: 2, explanation: `Cerita menyebutkan orang tuanya tinggal di apartemen (マンション) sehingga sulit mengizinkan memelihara anjing, hingga akhirnya pindah ke rumah tapak (一軒家).`, passage: `<p style="font-weight:700;margin-bottom:6px;">物語（犬を飼いたい）</p><p style="white-space:normal;line-height:1.9;">子供のころ、わたしは犬を飼いたくてしかたがありませんでした。しかし、両親はマンションに住んでいたので、なかなか許してくれませんでした。毎年、誕生日に「犬を飼いたい」とお願いしましたが、答えはいつも「もう少し大きくなってから」でした。中学生になったとき、家族で一軒家に引っ越すことになりました。その時、両親は「これでやっと犬を飼えるね」と言ってくれました。わたしは飛び上がるほどうれしかったです。それから今まで、うちには犬がいます。</p>`, sectionLabel: `読解 · Bacaan Menengah`, problemNumber: 9 },
+            { q: `この人はいつうれしいと思いましたか。`, choices: [`一軒家に引っ越して、犬を飼えると言われたとき。`, `誕生日に犬をもらったとき。`, `マンションに引っ越したとき。`, `中学校に入学したとき。`], a: 0, explanation: `Cerita menyebutkan saat pindah ke rumah tapak sewaktu SMP, orang tuanya berkata 'sekarang akhirnya bisa memelihara anjing', dan penulis merasa sangat senang saat itu (kalimat 'とび上がるほどうれしかった').`, passage: `<p style="font-weight:700;margin-bottom:6px;">物語（犬を飼いたい）</p><p style="white-space:normal;line-height:1.9;">子供のころ、わたしは犬を飼いたくてしかたがありませんでした。しかし、両親はマンションに住んでいたので、なかなか許してくれませんでした。毎年、誕生日に「犬を飼いたい」とお願いしましたが、答えはいつも「もう少し大きくなってから」でした。中学生になったとき、家族で一軒家に引っ越すことになりました。その時、両親は「これでやっと犬を飼えるね」と言ってくれました。わたしは飛び上がるほどうれしかったです。それから今まで、うちには犬がいます。</p>`, sectionLabel: `読解 · Bacaan Menengah`, problemNumber: 9 },
+            { q: `リーさんは平日の夜しか時間がありません。どのクラスがいいですか。`, choices: [`Aクラス`, `Dクラス`, `Bクラス`, `Cクラス`], a: 3, explanation: `Dari tabel, kelas yang diadakan pada hari kerja (weekday) di malam hari hanya kelas C, yaitu hari Jumat pukul 19:00–20:30. Kelas A dan B diadakan siang hari, kelas D diadakan hari Sabtu (bukan hari kerja).`, passage: `<p style="font-weight:700;margin-bottom:6px;">日本語教室のお知らせ</p><p style="margin-bottom:6px;">＜さくら市民センター　日本語教室＞</p><table style="border-collapse:collapse;width:100%;font-size:13px;margin-top:6px;"><thead><tr><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">クラス</th><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">曜日</th><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">時間</th><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">レベル</th><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">料金</th></tr></thead><tbody><tr><td style="border:1px solid #ddd;padding:6px 10px;">Aクラス</td><td style="border:1px solid #ddd;padding:6px 10px;">月・水</td><td style="border:1px solid #ddd;padding:6px 10px;">10:00〜11:30</td><td style="border:1px solid #ddd;padding:6px 10px;">初級（ひらがな・カタカナ）</td><td style="border:1px solid #ddd;padding:6px 10px;">月 2,000円</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">Bクラス</td><td style="border:1px solid #ddd;padding:6px 10px;">火・木</td><td style="border:1px solid #ddd;padding:6px 10px;">13:00〜14:30</td><td style="border:1px solid #ddd;padding:6px 10px;">初中級（N5〜N4）</td><td style="border:1px solid #ddd;padding:6px 10px;">月 2,500円</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">Cクラス</td><td style="border:1px solid #ddd;padding:6px 10px;">金</td><td style="border:1px solid #ddd;padding:6px 10px;">19:00〜20:30</td><td style="border:1px solid #ddd;padding:6px 10px;">中級（N3）</td><td style="border:1px solid #ddd;padding:6px 10px;">月 2,000円</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">Dクラス</td><td style="border:1px solid #ddd;padding:6px 10px;">土</td><td style="border:1px solid #ddd;padding:6px 10px;">10:00〜12:00</td><td style="border:1px solid #ddd;padding:6px 10px;">会話中心（レベル自由）</td><td style="border:1px solid #ddd;padding:6px 10px;">月 3,000円</td></tr></tbody></table><p style="font-size:12px;opacity:.8;margin-top:6px;">＊申し込みは市民センター受付、または電話（03-1234-5678）で。<br>＊初めての方はAクラスまたはBクラスをおすすめします。</p>`, sectionLabel: `読解 · Pencarian Informasi`, problemNumber: 10 },
+            { q: `ひらがなもまだ読めない人にはどのクラスがいいですか。`, choices: [`Dクラス`, `Cクラス`, `Bクラス`, `Aクラス`], a: 3, explanation: `Tabel mencantumkan Kelas A ditujukan untuk level 初級（ひらがな・カタカナ） yaitu pemula yang bahkan belum bisa membaca hiragana/katakana, sehingga paling cocok untuk orang yang belum bisa membaca hiragana sama sekali.`, passage: `<p style="font-weight:700;margin-bottom:6px;">日本語教室のお知らせ</p><p style="margin-bottom:6px;">＜さくら市民センター　日本語教室＞</p><table style="border-collapse:collapse;width:100%;font-size:13px;margin-top:6px;"><thead><tr><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">クラス</th><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">曜日</th><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">時間</th><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">レベル</th><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">料金</th></tr></thead><tbody><tr><td style="border:1px solid #ddd;padding:6px 10px;">Aクラス</td><td style="border:1px solid #ddd;padding:6px 10px;">月・水</td><td style="border:1px solid #ddd;padding:6px 10px;">10:00〜11:30</td><td style="border:1px solid #ddd;padding:6px 10px;">初級（ひらがな・カタカナ）</td><td style="border:1px solid #ddd;padding:6px 10px;">月 2,000円</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">Bクラス</td><td style="border:1px solid #ddd;padding:6px 10px;">火・木</td><td style="border:1px solid #ddd;padding:6px 10px;">13:00〜14:30</td><td style="border:1px solid #ddd;padding:6px 10px;">初中級（N5〜N4）</td><td style="border:1px solid #ddd;padding:6px 10px;">月 2,500円</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">Cクラス</td><td style="border:1px solid #ddd;padding:6px 10px;">金</td><td style="border:1px solid #ddd;padding:6px 10px;">19:00〜20:30</td><td style="border:1px solid #ddd;padding:6px 10px;">中級（N3）</td><td style="border:1px solid #ddd;padding:6px 10px;">月 2,000円</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">Dクラス</td><td style="border:1px solid #ddd;padding:6px 10px;">土</td><td style="border:1px solid #ddd;padding:6px 10px;">10:00〜12:00</td><td style="border:1px solid #ddd;padding:6px 10px;">会話中心（レベル自由）</td><td style="border:1px solid #ddd;padding:6px 10px;">月 3,000円</td></tr></tbody></table><p style="font-size:12px;opacity:.8;margin-top:6px;">＊申し込みは市民センター受付、または電話（03-1234-5678）で。<br>＊初めての方はAクラスまたはBクラスをおすすめします。</p>`, sectionLabel: `読解 · Pencarian Informasi`, problemNumber: 10 },
+            { q: `9時40分のバスに乗ると、どのくらいでみどり公園に着きますか。(waktu tempuh normal 20 menit)`, choices: [`約60分`, `約35分`, `約20分`, `約10分`], a: 1, explanation: `Bus jam 9:40 termasuk dalam jam sibuk (9時台) yang menurut keterangan tabel butuh tambahan sekitar 15 menit dari waktu tempuh normal. Jadi 20 menit (normal) + 15 menit (tambahan macet) = sekitar 35 menit.`, passage: `<p style="font-weight:700;margin-bottom:6px;">中央駅→みどり公園行き バス時刻表</p><p style="margin-bottom:6px;">＜中央駅　→　みどり公園　行き　バス時刻表＞</p><table style="border-collapse:collapse;width:100%;font-size:13px;margin-top:6px;"><thead><tr><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">時</th><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">発車時刻</th></tr></thead><tbody><tr><td style="border:1px solid #ddd;padding:6px 10px;">8時</td><td style="border:1px solid #ddd;padding:6px 10px;">10, 30, 50</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">9時</td><td style="border:1px solid #ddd;padding:6px 10px;">00, 20, 40</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">10時</td><td style="border:1px solid #ddd;padding:6px 10px;">00, 30</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">11時</td><td style="border:1px solid #ddd;padding:6px 10px;">00, 30</td></tr></tbody></table><p style="font-size:12px;opacity:.8;margin-top:6px;">＊料金：おとな250円、こども120円<br>＊9時台は通勤時間のため、道が混みます。到着まで通常より15分ほど余分にかかる場合があります。</p>`, sectionLabel: `読解 · Pencarian Informasi`, problemNumber: 10 },
+            { q: `10時に中央駅に着いて、すぐ次のバスに乗りたいです。何時のバスに乗れますか。`, choices: [`9時40分`, `10時00分`, `10時30分`, `11時00分`], a: 2, explanation: `Karena tiba pukul 10:00 tepat, bus jam 09:40 dan 10:00 sudah lewat/tepat berangkat sebelum bisa dikejar dengan aman, sehingga bus berikutnya yang bisa dinaiki adalah pukul 10:30 (sesuai jadwal jam 10: 00, 30).`, passage: `<p style="font-weight:700;margin-bottom:6px;">中央駅→みどり公園行き バス時刻表</p><p style="margin-bottom:6px;">＜中央駅　→　みどり公園　行き　バス時刻表＞</p><table style="border-collapse:collapse;width:100%;font-size:13px;margin-top:6px;"><thead><tr><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">時</th><th style="border:1px solid #ddd;padding:6px 10px;background:#f3eaf1;">発車時刻</th></tr></thead><tbody><tr><td style="border:1px solid #ddd;padding:6px 10px;">8時</td><td style="border:1px solid #ddd;padding:6px 10px;">10, 30, 50</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">9時</td><td style="border:1px solid #ddd;padding:6px 10px;">00, 20, 40</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">10時</td><td style="border:1px solid #ddd;padding:6px 10px;">00, 30</td></tr><tr><td style="border:1px solid #ddd;padding:6px 10px;">11時</td><td style="border:1px solid #ddd;padding:6px 10px;">00, 30</td></tr></tbody></table><p style="font-size:12px;opacity:.8;margin-top:6px;">＊料金：おとな250円、こども120円<br>＊9時台は通勤時間のため、道が混みます。到着まで通常より15分ほど余分にかかる場合があります。</p>`, sectionLabel: `読解 · Pencarian Informasi`, problemNumber: 10 }
+          ],
           particleBank: [
             { s: "わたし（　）がくせいです。", a: "は", choices: ["は", "を", "で"] },
             { s: "パン（　）たべます。", a: "を", choices: ["を", "は", "に"] },
@@ -1054,9 +1227,105 @@
           feedbackCorrect: entry.choices[entry.a]
         }
       }
+      function makeOfficialQuestion(levelKey, entry, index) {
+        const letters = ["A", "B", "C", "D"]
+        const options = entry.choices.map((t, i) => ({ id: letters[i], text: t }))
+        const correctOptionId = letters[entry.a]
+        return {
+          id: `${levelKey}-official-${String(index + 1).padStart(4, "0")}`,
+          type: "official",
+          problemNumber: entry.problemNumber,
+          typeLabel: entry.sectionLabel || "問題 / Latihan Resmi",
+          vocabRef: null,
+          prompt: { primary: entry.passage || "", secondary: entry.passage ? "Baca teks di atas, lalu jawab pertanyaannya." : "Pilih jawaban yang paling tepat." },
+          questionText: entry.q,
+          questionSub: entry.sectionLabel || "",
+          options,
+          correctOptionId,
+          feedbackCorrect: entry.choices[entry.a],
+          explanationText: entry.explanation
+        }
+      }
+
+      const CATEGORY_GROUPS = [
+        {
+          id: "mcq",
+          icon: "📘",
+          label: "Pilihan Ganda",
+          desc: "Kanji, kosakata, partikel, dan pola tata bahasa.",
+          match: (q) => (q.type === "official" ? [1, 2, 3, 4, 5].includes(q.problemNumber) : ["reading", "kanji", "particle", "pattern", "synonym"].includes(q.type))
+        },
+        {
+          id: "narabi",
+          icon: "★",
+          label: "Susunan Kalimat",
+          desc: "Latihan menyusun potongan kata menjadi kalimat yang benar.",
+          match: (q) => (q.type === "official" ? q.problemNumber === 6 : q.type === "narabi")
+        },
+        {
+          id: "reading",
+          icon: "📖",
+          label: "Pemahaman Bacaan",
+          desc: "Lengkapi bacaan dan pahami teks panjang / dokai.",
+          match: (q) => (q.type === "official" ? [7, 8, 9, 10].includes(q.problemNumber) : q.type === "story")
+        }
+      ]
+
+      const N5_SUBTAGS = [
+        { problemNumber: 1, label: "P1" },
+        { problemNumber: 2, label: "P2" },
+        { problemNumber: 3, label: "P3" },
+        { problemNumber: 4, label: "P4" },
+        { problemNumber: 5, label: "P5" },
+        { problemNumber: 6, label: "P6" },
+        { problemNumber: 7, label: "P7" },
+        { problemNumber: 8, label: "P8" },
+        { problemNumber: 9, label: "P9" },
+        { problemNumber: 10, label: "P10" }
+      ]
+
+      const CATEGORY_SESSION_CAP = 60
+
+      function buildFilteredPool(levelKey, categoryId, problemNumber) {
+        const fullPool = buildQuestionPool(levelKey)
+        const category = CATEGORY_GROUPS.find((c) => c.id === categoryId)
+        let filtered = category ? fullPool.filter(category.match) : fullPool
+        if (problemNumber != null) {
+          filtered = filtered.filter((q) => q.problemNumber === Number(problemNumber))
+        }
+        return shuffle(filtered)
+      }
+
+      function startCategorySession(categoryId, problemNumber) {
+        const filtered = buildFilteredPool(state.levelKey, categoryId, problemNumber)
+        if (!filtered.length) return
+        markProfileActive(state.profile)
+        syncN5RoadmapCompletionFromXp()
+        persistProgress()
+        state.screen = "quiz"
+        state.mode = "normal"
+        state.sessionQuestions = filtered.length > CATEGORY_SESSION_CAP ? filtered.slice(0, CATEGORY_SESSION_CAP) : filtered
+        state.questionIndex = 0
+        state.score = 0
+        state.sessionEarnedXp = 0
+        state.feedback = null
+        state.wrongList = []
+        state.savedWrongList = []
+        state.lastResult = null
+        render()
+      }
+
       function buildQuestionPool(levelKey) {
         const level = levels[levelKey]
         const pool = []
+
+        if (levelKey === "n5" && level.officialBank && level.officialBank.length) {
+          for (let i = 0; i < level.officialBank.length; i += 1) {
+            pool.push(makeOfficialQuestion(levelKey, level.officialBank[i], pool.length))
+          }
+          return pool
+        }
+
         const vocabLimit = (levelKey === "n4" || levelKey === "n3") ? 30 : level.vocab.length
         const vocabIndices = shuffle([...Array(level.vocab.length).keys()]).slice(0, vocabLimit)
         for (let vi = 0; vi < vocabIndices.length; vi += 1) { const i = vocabIndices[vi]
@@ -1459,7 +1728,7 @@
             <div class="sidebar-profile__row">
               <div class="sidebar-profile__avatar">${initialsFromName(APP_NAME)}</div>
               <div>
-                <p class="sidebar-profile__name">Ngebut Learner</p>
+                <p class="sidebar-profile__name">NgebutJLPT</p>
                 <p class="sidebar-profile__sub">Active level ${currentLevel().label} • Ready for focused study</p>
               </div>
             </div>
@@ -1478,10 +1747,13 @@
             <p class="sidebar-card__label">Quick Actions</p>
             <div class="stack">
               ${buttonHtml({ label: "Mulai Sesi Baru", action: "start", variant: "primary" })}
+              ${buttonHtml({ label: "Latihan per Kategori", action: "navigate", screen: "categories", variant: "secondary" })}
               ${buttonHtml({ label: "Review Vocabulary", action: "navigate", screen: "vocabulary", variant: "secondary" })}
               ${buttonHtml({ label: "Buka Progress", action: "navigate", screen: "progress", variant: "ghost" })}
             </div>
           </section>
+
+          <p style="text-align:center;font-size:11px;opacity:.55;padding:12px 4px 4px;">© Dadik Irawan 2026</p>
         `
       }
 
@@ -1611,6 +1883,61 @@
             </div>
             <div class="achievement-grid">${achievementCards}</div>
           </section>
+
+          <p style="text-align:center;font-size:11px;opacity:.5;padding:16px 4px 4px;">© Dadik Irawan 2026</p>
+        `
+      }
+
+      function renderCategories() {
+        const activeLevel = currentLevel()
+        const fullPool = buildQuestionPool(state.levelKey)
+
+        const cards = CATEGORY_GROUPS
+          .map((cat) => {
+            const matched = fullPool.filter(cat.match)
+            const count = matched.length
+            const subtags = activeLevel.officialBank
+              ? N5_SUBTAGS.filter((t) => matched.some((q) => q.problemNumber === t.problemNumber))
+              : []
+            const subtagsHtml = subtags.length
+              ? `<div class="level-card__stats">${subtags
+                  .map((t) => `<button class="chip" data-action="start-category" data-category="${cat.id}" data-problem="${t.problemNumber}" style="cursor:pointer;border:none;">${t.label}</button>`)
+                  .join("")}</div>`
+              : ""
+            return `
+              <article class="level-card">
+                <div class="level-card__head">
+                  <div class="level-card__title-wrap">
+                    <p class="level-card__meta">${cat.icon} ${cat.label}</p>
+                    <h3 class="level-card__title">${cat.label}</h3>
+                    <p class="level-card__desc">${cat.desc}</p>
+                  </div>
+                  <span class="status-pill status-pill--info">${formatNumber(count)} soal</span>
+                </div>
+                ${subtagsHtml}
+                <div class="level-card__actions">
+                  <button class="level-action level-action--primary" data-action="start-category" data-category="${cat.id}" ${count ? "" : "disabled"}>
+                    Latihan ${cat.label}
+                  </button>
+                </div>
+              </article>
+            `
+          })
+          .join("")
+
+        app.innerHTML = `
+          <section class="surface-card">
+            <div class="surface-card__header">
+              <div>
+                <p class="section-caption">Latihan per Kategori · ${activeLevel.label}</p>
+                <h2 class="section-title">Klik kartu tipe soal untuk memulai sesi latihan khusus.</h2>
+                <p class="section-note">Kamu juga bisa klik tag nomor bagian (P1/P2/dst, khusus N5) di bawah deskripsi untuk mencoba satu bagian saja.</p>
+              </div>
+            </div>
+            <div class="level-grid">${cards}</div>
+          </section>
+
+          <p style="text-align:center;font-size:11px;opacity:.5;padding:16px 4px 4px;">© Dadik Irawan 2026</p>
         `
       }
 
@@ -1776,6 +2103,7 @@
                     <dt>Jawaban benar</dt>
                     <dd><strong>${displayField(explanation?.correctAnswer ?? state.feedback.correctText)}</strong></dd>
                   </div>
+                  ${q.type === "official" ? "" : `
                   <div class="explanation-row">
                     <dt>Romaji</dt>
                     <dd>${displayField(explanation?.romaji)}</dd>
@@ -1784,12 +2112,20 @@
                     <dt>Arti (ID)</dt>
                     <dd>${displayField(explanation?.meaningId)}</dd>
                   </div>
+                  `}
+                  ${q.type === "official" && explanation?.exampleJp ? `
+                  <div class="explanation-row">
+                    <dt>Bacaan</dt>
+                    <dd>${explanation.exampleJp}</dd>
+                  </div>
+                  ` : `
                   <div class="explanation-row">
                     <dt>Contoh kalimat</dt>
                     <dd>${displayField(explanation?.exampleJp)}</dd>
                   </div>
+                  `}
                   <div class="explanation-row">
-                    <dt>Terjemahan (ID)</dt>
+                    <dt>${q.type === "official" ? "Pembahasan" : "Terjemahan (ID)"}</dt>
                     <dd>${displayField(explanation?.exampleId)}</dd>
                   </div>
                 </dl>
@@ -2101,6 +2437,11 @@
           return
         }
 
+        if (state.screen === "categories") {
+          renderCategories()
+          return
+        }
+
         renderResult()
       }
 
@@ -2264,6 +2605,13 @@
 
         if (action === "start") {
           startGame()
+          return
+        }
+
+        if (action === "start-category") {
+          const categoryId = el.getAttribute("data-category")
+          const problemNumber = el.getAttribute("data-problem")
+          startCategorySession(categoryId, problemNumber ? Number(problemNumber) : null)
           return
         }
 
