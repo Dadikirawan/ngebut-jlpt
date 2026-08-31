@@ -1348,15 +1348,23 @@
         { screen: "progress", label: "Progress", icon: "↗" }
       ]
 
+      function keyOfLevel(lv) {
+        return Object.keys(levels).find((k) => levels[k] === lv) || null
+      }
+
       function levelStats(lv) {
         const vocabCount = lv.vocab.length
         const particleCount = lv.particleBank.length
         const patternCount = lv.patternBank.length
         const storyCount = lv.storyBank.length
+        const levelKey = keyOfLevel(lv)
         const poolCount = lv.officialBank && lv.officialBank.length
           ? lv.officialBank.length
           : (vocabCount * 2) + particleCount + patternCount + storyCount
-        return { vocabCount, particleCount, patternCount, storyCount, poolCount }
+        const readingCount = lv.officialBank && lv.officialBank.length && levelKey
+          ? buildFilteredPool(levelKey, "reading", null).length
+          : storyCount
+        return { vocabCount, particleCount, patternCount, storyCount, poolCount, readingCount }
       }
 
       function rand(list) {
@@ -2144,7 +2152,7 @@
                 <div class="level-card__stats">
                   <span class="chip">${formatNumber(lvStats.poolCount)} soal</span>
                   <span class="chip">${formatNumber(lvStats.vocabCount)} vocab</span>
-                  <span class="chip">${formatNumber(lvStats.storyCount)} dokai</span>
+                  <span class="chip">${formatNumber(lvStats.readingCount)} dokai</span>
                 </div>
                 <p class="level-card__note">Dirancang untuk sesi belajar cepat, review ringan, dan transisi yang rapi antar mode latihan.</p>
                 <div class="level-card__actions">
@@ -2342,7 +2350,7 @@
               ${metricCardHtml("Vocab Seen", `${formatNumber(seenCount)}/${formatNumber(vocabTotal)}`, "Kata yang sudah pernah muncul di quiz (benar atau salah).")}
               ${metricCardHtml("Particle Bank", formatNumber(stats.particleCount), "Bank latihan partikel untuk memperkuat konteks kalimat.")}
               ${metricCardHtml("Pattern Bank", formatNumber(stats.patternCount), "Pola bunpou yang bisa diulang berkali-kali.")}
-              ${metricCardHtml("Dokai", formatNumber(stats.storyCount), "Latihan reading comprehension singkat untuk membangun endurance.")}
+              ${metricCardHtml("Dokai", formatNumber(stats.readingCount), "Latihan reading comprehension singkat untuk membangun endurance.")}
             </div>
           </section>
 
